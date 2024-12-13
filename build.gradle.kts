@@ -42,6 +42,11 @@ dependencies {
 
     // Test
     testImplementation("org.springframework.boot:spring-boot-starter-test")
+
+    // Parser, PDF
+    implementation("org.jsoup:jsoup:1.16.1")
+    implementation("org.apache.pdfbox:pdfbox:2.0.29")
+
 }
 
 tasks.withType<Test> {
