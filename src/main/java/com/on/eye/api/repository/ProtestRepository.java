@@ -11,8 +11,7 @@ public interface ProtestRepository extends JpaRepository<Protest, Long> {
     // 상태별 시위 목록 조회
     List<Protest> findByStatus(ProtestStatus status);
 
-    // 특정 기간 내의 시위 목록 조회
-    List<Protest> findByStartDateTimeBetween(LocalDateTime startDateTime, LocalDateTime endDateTime);
+    List<Protest> findByStartDateTimeBetween(LocalDateTime startDateTimeAfter, LocalDateTime startDateTimeBefore);
 
     // 특정 장소에서 진행되는 시위 목록 조회
     List<Protest> findByLocation(String location);

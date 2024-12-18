@@ -3,6 +3,7 @@ package com.on.eye.api.service;
 import com.on.eye.api.domain.Protest;
 import com.on.eye.api.dto.ProtestCreateDto;
 import com.on.eye.api.dto.ProtestDetailDto;
+import com.on.eye.api.dto.ProtestListItemDto;
 import com.on.eye.api.dto.ProtestUpdateDto;
 import com.on.eye.api.mapper.ProtestMapper;
 import com.on.eye.api.repository.ProtestRepository;
@@ -10,6 +11,10 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.crossstore.ChangeSetPersister;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -26,6 +31,16 @@ public class ProtestService {
     public ProtestDetailDto getProtestDetail(Long id) {
         Protest protest = protestRepository.findById(id).orElse(null);
         return ProtestMapper.toDto(protest);
+    }
+
+    public List<ProtestListItemDto> getProtestsBy(LocalDate date) {
+        LocalDateTime startOfDay = date.atStartOfDay();
+        LocalDateTime endOfDay = date.atTime(LocalTime.MAX);
+
+        return protestRepository.findByStartDateTimeBetween(startOfDay, endOfDay)
+                .stream()
+                .map(ProtestListItemDto::from)
+                .toList();
     }
 
     public Long updateProtest(Long id, ProtestUpdateDto updateDto) throws ChangeSetPersister.NotFoundException {
