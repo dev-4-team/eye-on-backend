@@ -1,7 +1,8 @@
 package com.on.eye.api.dto;
 
-import jakarta.validation.constraints.NotEmpty;
-import jakarta.validation.constraints.NotNull;
+
+import com.on.eye.api.validator.ValidProtestDateTimeRange;
+import jakarta.validation.constraints.*;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -10,15 +11,18 @@ import java.time.LocalDateTime;
 
 @Getter
 @NoArgsConstructor
+@ValidProtestDateTimeRange
 public class ProtestCreateDto {
     private String title;
 
     private String description;
 
     @NotNull(message = "Start date and time cannot be null")
+    @Future(message = "Start date and time must be in the future")
     private LocalDateTime startDateTime;
 
     @NotNull(message = "End date and time cannot be null")
+    @Future(message = "End date and time must be in the future")
     private LocalDateTime endDateTime;
 
     @NotEmpty(message = "Location cannot be empty")
@@ -26,12 +30,10 @@ public class ProtestCreateDto {
 
     private String organizer;
 
-    @NotEmpty(message = "declaredParticipants cannot be empty")
+    @NotNull(message = "declaredParticipants cannot be null")
+    @Min(0)
+    @Max(5000000)
     private Integer declaredParticipants;
-
-    public boolean isValidDateTimeRange() {
-        return this.startDateTime != null && this.endDateTime != null && this.startDateTime.isBefore(this.endDateTime);
-    }
 
     @Builder
     public ProtestCreateDto(String title, String description, LocalDateTime startDateTime, LocalDateTime endDateTime, String location, String organizer, Integer declaredParticipants) {
