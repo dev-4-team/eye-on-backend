@@ -7,7 +7,6 @@ import com.on.eye.api.dto.ProtestUpdateDto;
 import com.on.eye.api.service.ProtestService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.crossstore.ChangeSetPersister.NotFoundException;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -52,11 +51,7 @@ public class ProtestController {
             @PathVariable Long id,
             @Valid @RequestBody ProtestUpdateDto updateDto
     ) {
-        try {
-            Long updatedId = protestService.updateProtest(id, updateDto);
-            return ResponseEntity.ok(updatedId);
-        } catch (NotFoundException e) {
-            return ResponseEntity.notFound().build();
-        }
+        Long updatedId = protestService.updateProtest(id, updateDto);
+        return ResponseEntity.ok(updatedId);
     }
 }
