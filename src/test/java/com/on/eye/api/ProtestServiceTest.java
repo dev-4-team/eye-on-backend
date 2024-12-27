@@ -6,6 +6,7 @@ import com.on.eye.api.dto.ProtestCreateDto;
 import com.on.eye.api.dto.ProtestDetailDto;
 import com.on.eye.api.dto.ProtestListItemDto;
 import com.on.eye.api.dto.ProtestUpdateDto;
+import com.on.eye.api.exception.ResourceNotFoundException;
 import com.on.eye.api.repository.ProtestRepository;
 import com.on.eye.api.service.ProtestService;
 import org.junit.jupiter.api.BeforeEach;
@@ -14,7 +15,6 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.data.crossstore.ChangeSetPersister;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -23,6 +23,7 @@ import java.util.List;
 import java.util.stream.IntStream;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @SpringBootTest
 class ProtestServiceTest {
@@ -110,7 +111,7 @@ class ProtestServiceTest {
 
     @Test
     @DisplayName("성공: 특정 시위 정보 수정")
-    void updateProtest() throws ChangeSetPersister.NotFoundException {
+    void updateProtest() {
         // Given
         Protest savedProtest = protestService.createProtest(testProtestDto);
 
@@ -137,12 +138,14 @@ class ProtestServiceTest {
     }
 
     @Test
-    @DisplayName("실패: 유효하지 않은 ID 수정 시도") // TODO: 예외처리 방식에 대해 고민 후 작성
+    @DisplayName("실패: 유효하지 않은 ID 수정 시도")
     void updateProtest_WhenProtestIsOngoing_ShouldThrowException() {
         // Given
         Long invalidId = 1000L;
 
-        // When
+        // When & Then
+        assertThrows(ResourceNotFoundException.class, () -> protestService.updateProtest(invalidId, null));
+        assertThrows(ResourceNotFoundException.class, () -> protestService.getProtestDetail(invalidId));
     }
 
     @Nested
