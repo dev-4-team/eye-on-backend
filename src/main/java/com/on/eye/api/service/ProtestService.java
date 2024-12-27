@@ -5,10 +5,11 @@ import com.on.eye.api.dto.ProtestCreateDto;
 import com.on.eye.api.dto.ProtestDetailDto;
 import com.on.eye.api.dto.ProtestListItemDto;
 import com.on.eye.api.dto.ProtestUpdateDto;
+import com.on.eye.api.exception.ResourceNotFoundException;
 import com.on.eye.api.mapper.ProtestMapper;
 import com.on.eye.api.repository.ProtestRepository;
+import com.on.eye.api.util.Constants;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.crossstore.ChangeSetPersister;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
@@ -21,7 +22,8 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class ProtestService {
     private final ProtestRepository protestRepository;
-    
+    private static final String RESOURCE_NAME = "Protest";
+
     public Protest createProtest(ProtestCreateDto protestCreateDto) {
         // 생성 시간 기준으로 상태 자동 설정
         Protest protest = ProtestMapper.toEntity(protestCreateDto);
@@ -29,7 +31,7 @@ public class ProtestService {
     }
 
     public ProtestDetailDto getProtestDetail(Long id) {
-        Protest protest = protestRepository.findById(id).orElse(null);
+        Protest protest = getProtestById(id);
         return ProtestMapper.toDto(protest);
     }
 
@@ -43,10 +45,9 @@ public class ProtestService {
                 .toList();
     }
 
-    public Long updateProtest(Long id, ProtestUpdateDto updateDto) throws ChangeSetPersister.NotFoundException {
+    public Long updateProtest(Long id, ProtestUpdateDto updateDto) {
         // Find the protest by ID
-        Protest protest = protestRepository.findById(id)
-                .orElseThrow(ChangeSetPersister.NotFoundException::new);
+        Protest protest = getProtestById(id);
 
         // Reflect non-null updateDto fields into the protest entity
         applyUpdates(protest, updateDto);
@@ -69,5 +70,9 @@ public class ProtestService {
             Optional.ofNullable(updateDto.getOrganizer()).ifPresent(protest::setOrganizer);
             Optional.ofNullable(updateDto.getStatus()).ifPresent(protest::setStatus);
         }
+    }
+
+    private Protest getProtestById(Long id) {
+        return protestRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException(RESOURCE_NAME, Constants.ID, id));
     }
 }
