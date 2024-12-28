@@ -16,9 +16,4 @@ public class DemoPostImage {
     private Long id;
 
     private String imageUrl;
-//    private byte[] imageData;
-
-//    @ManyToOne
-//    @JoinColumn(name = "demo_post_id")
-//    private DemoPost demoPost;
 }
