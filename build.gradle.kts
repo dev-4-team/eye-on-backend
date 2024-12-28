@@ -42,6 +42,9 @@ dependencies {
 
     // Test
     testImplementation("org.springframework.boot:spring-boot-starter-test")
+
+    // Parser
+    implementation ("org.jsoup:jsoup:1.15.4")
 }
 
 tasks.withType<Test> {
