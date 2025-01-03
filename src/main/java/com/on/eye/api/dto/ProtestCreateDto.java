@@ -7,7 +7,10 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.List;
+
 
 @Getter
 @NoArgsConstructor
@@ -35,8 +38,33 @@ public class ProtestCreateDto {
     @Max(5000000)
     private Integer declaredParticipants;
 
+    @NotEmpty(message = "locations cannot be empty")
+    private List<LocationDto> locations;
+
+    @Getter
+    public static class LocationDto {
+        @NotEmpty(message = "locationName cannot be empty")
+        private final String locationName;
+
+        @NotNull(message = "longitude cannot be null")
+        @Digits(integer = 3, fraction = 14, message = "longitude must have up to 3 integer digits and 14 fractional digits")
+        BigDecimal latitude;
+
+        @NotNull(message = "latitude cannot be null")
+        @Digits(integer = 3, fraction = 14, message = "latitude must have up to 3 integer digits and 14 fractional digits")
+        BigDecimal longitude;
+
+        public LocationDto(String locationName, BigDecimal latitude, BigDecimal longitude) {
+            this.locationName = locationName;
+            this.latitude = latitude;
+            this.longitude = longitude;
+        }
+    }
+
     @Builder
-    public ProtestCreateDto(String title, String description, LocalDateTime startDateTime, LocalDateTime endDateTime, String location, String organizer, Integer declaredParticipants) {
+    public ProtestCreateDto(String title, String description, LocalDateTime startDateTime, LocalDateTime endDateTime,
+                            String location, String organizer, Integer declaredParticipants,
+                            List<LocationDto> locations) {
         this.title = title;
         this.description = description;
         this.startDateTime = startDateTime;
@@ -44,5 +72,6 @@ public class ProtestCreateDto {
         this.location = location;
         this.organizer = organizer;
         this.declaredParticipants = declaredParticipants;
+        this.locations = locations;
     }
 }
