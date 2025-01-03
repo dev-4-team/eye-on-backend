@@ -7,6 +7,8 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(name = "protests")
@@ -33,6 +35,10 @@ public class Protest {
 
     @Column(nullable = false)
     private String location; // 집회 장소(행진로)
+
+    @OneToMany(mappedBy = "protest", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OrderBy("sequence ASC")
+    private List<ProtestLocationMapping> locationMappings = new ArrayList<>();
 
     private String organizer;
 
