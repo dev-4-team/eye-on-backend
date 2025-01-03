@@ -3,10 +3,7 @@ package com.on.eye.api.service;
 import com.on.eye.api.domain.Location;
 import com.on.eye.api.domain.Protest;
 import com.on.eye.api.domain.ProtestLocationMapping;
-import com.on.eye.api.dto.ProtestCreateDto;
-import com.on.eye.api.dto.ProtestDetailDto;
-import com.on.eye.api.dto.ProtestListItemDto;
-import com.on.eye.api.dto.ProtestUpdateDto;
+import com.on.eye.api.dto.*;
 import com.on.eye.api.exception.ResourceNotFoundException;
 import com.on.eye.api.mapper.ProtestMapper;
 import com.on.eye.api.repository.LocationRepository;
@@ -86,7 +83,7 @@ public class ProtestService {
 
     private void setLocationMappings(Protest protest, ProtestCreateDto protestCreateDto) {
         int sequence = 0;
-        for (ProtestCreateDto.LocationDto locationDto : protestCreateDto.getLocations()) {
+        for (LocationDto locationDto : protestCreateDto.getLocations()) {
             // Retrieve or create location
             Location location = getOrCreateLocation(locationDto);
 
@@ -95,7 +92,7 @@ public class ProtestService {
         }
     }
 
-    private Location getOrCreateLocation(ProtestCreateDto.LocationDto locationDto) {
+    private Location getOrCreateLocation(LocationDto locationDto) {
         return locationRepository.findByName(locationDto.getLocationName())
                 .orElseGet(() -> locationRepository.save(
                         Location.builder()
