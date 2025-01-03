@@ -1,12 +1,15 @@
 package com.on.eye.api.service;
 
+import com.on.eye.api.domain.Location;
 import com.on.eye.api.domain.Protest;
+import com.on.eye.api.domain.ProtestLocationMapping;
 import com.on.eye.api.dto.ProtestCreateDto;
 import com.on.eye.api.dto.ProtestDetailDto;
 import com.on.eye.api.dto.ProtestListItemDto;
 import com.on.eye.api.dto.ProtestUpdateDto;
 import com.on.eye.api.exception.ResourceNotFoundException;
 import com.on.eye.api.mapper.ProtestMapper;
+import com.on.eye.api.repository.LocationRepository;
 import com.on.eye.api.repository.ProtestRepository;
 import com.on.eye.api.util.Constants;
 import lombok.RequiredArgsConstructor;
@@ -22,11 +25,16 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class ProtestService {
     private final ProtestRepository protestRepository;
+    private final LocationRepository locationRepository;
     private static final String RESOURCE_NAME = "Protest";
 
     public Protest createProtest(ProtestCreateDto protestCreateDto) {
         // 생성 시간 기준으로 상태 자동 설정
         Protest protest = ProtestMapper.toEntity(protestCreateDto);
+
+        // set locations using locationDto
+        setLocationMappings(protest, protestCreateDto);
+        // ProtestLocationMapping도 Casacade 설정으로 함께 저장됨
         return protestRepository.save(protest);
     }
 
@@ -74,5 +82,37 @@ public class ProtestService {
 
     private Protest getProtestById(Long id) {
         return protestRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException(RESOURCE_NAME, Constants.ID, id));
+    }
+
+    private void setLocationMappings(Protest protest, ProtestCreateDto protestCreateDto) {
+        int sequence = 0;
+        for (ProtestCreateDto.LocationDto locationDto : protestCreateDto.getLocations()) {
+            // Retrieve or create location
+            Location location = getOrCreateLocation(locationDto);
+
+            // Create and add mapping
+            createAndAddMapping(protest, location, sequence++);
+        }
+    }
+
+    private Location getOrCreateLocation(ProtestCreateDto.LocationDto locationDto) {
+        return locationRepository.findByName(locationDto.getLocationName())
+                .orElseGet(() -> locationRepository.save(
+                        Location.builder()
+                                .name(locationDto.getLocationName())
+                                .latitude(locationDto.getLatitude())
+                                .longitude(locationDto.getLongitude())
+                                .build()
+                ));
+    }
+
+    private void createAndAddMapping(Protest protest, Location location, int sequence) {
+        ProtestLocationMapping mapping = ProtestLocationMapping.builder()
+                .protest(protest)
+                .location(location)
+                .sequence(sequence)
+                .build();
+
+        protest.getLocationMappings().add(mapping);
     }
 }
