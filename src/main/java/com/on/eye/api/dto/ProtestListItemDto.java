@@ -9,6 +9,7 @@ import lombok.Builder;
 import lombok.Getter;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Getter
 @Builder
@@ -30,7 +31,9 @@ public class ProtestListItemDto {
     @Enumerated(EnumType.STRING)
     private ProtestStatus status;
 
-    public ProtestListItemDto(Long id, String title, LocalDateTime startDateTime, LocalDateTime endDateTime, String location, String organizer, Integer declaredParticipants, ProtestStatus status) {
+    private List<LocationDto> locations;
+
+    public ProtestListItemDto(Long id, String title, LocalDateTime startDateTime, LocalDateTime endDateTime, String location, String organizer, Integer declaredParticipants, ProtestStatus status, List<LocationDto> locations) {
         this.id = id;
         this.title = title;
         this.startDateTime = startDateTime;
@@ -39,9 +42,10 @@ public class ProtestListItemDto {
         this.organizer = organizer;
         this.declaredParticipants = declaredParticipants;
         this.status = status;
+        this.locations = locations;
     }
 
-    public static ProtestListItemDto from(Protest protest) {
+    public static ProtestListItemDto from(Protest protest, List<LocationDto> locations) {
         return ProtestListItemDto.builder()
                 .id(protest.getId())
                 .title(protest.getTitle())
@@ -51,6 +55,7 @@ public class ProtestListItemDto {
                 .organizer(protest.getOrganizer())
                 .declaredParticipants(protest.getDeclaredParticipants())
                 .status(protest.getStatus())
+                .locations(locations)
                 .build();
     }
 

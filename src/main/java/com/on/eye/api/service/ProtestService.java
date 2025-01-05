@@ -11,10 +11,12 @@ import com.on.eye.api.repository.ProtestRepository;
 import com.on.eye.api.util.Constants;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 
@@ -35,18 +37,26 @@ public class ProtestService {
         return protestRepository.save(protest);
     }
 
+    @Transactional(readOnly = true)
     public ProtestDetailDto getProtestDetail(Long id) {
         Protest protest = getProtestById(id);
-        return ProtestMapper.toDto(protest);
+
+        List<LocationDto> locations = getLocations(protest);
+
+        return ProtestDetailDto.from(protest, locations);
     }
 
+    @Transactional(readOnly = true)
     public List<ProtestListItemDto> getProtestsBy(LocalDate date) {
         LocalDateTime startOfDay = date.atStartOfDay();
         LocalDateTime endOfDay = date.atTime(LocalTime.MAX);
 
         return protestRepository.findByStartDateTimeBetween(startOfDay, endOfDay)
                 .stream()
-                .map(ProtestListItemDto::from)
+                .map(protest -> {
+                    List<LocationDto> locations = getLocations(protest);
+                    return ProtestListItemDto.from(protest, locations);
+                })
                 .toList();
     }
 
@@ -111,5 +121,12 @@ public class ProtestService {
                 .build();
 
         protest.getLocationMappings().add(mapping);
+    }
+
+    private List<LocationDto> getLocations(Protest protest) {
+        return protest.getLocationMappings().stream()
+                .sorted(Comparator.comparing(ProtestLocationMapping::getSequence))
+                .map(mapping -> LocationDto.from(mapping.getLocation()))
+                .toList();
     }
 }
