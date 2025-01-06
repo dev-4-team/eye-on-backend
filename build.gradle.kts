@@ -30,10 +30,10 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-validation")
     implementation("org.springframework.boot:spring-boot-starter-actuator")
 
-    // PostgreSQL & PostGIS
+    // PostgreSQL. PostGIS 및 location 관련 의존성은 추후 추가
     implementation("org.postgresql:postgresql")
-    implementation("org.hibernate.orm:hibernate-spatial")
 
+    // Dev Tools
     developmentOnly("org.springframework.boot:spring-boot-devtools")
 
     // Lombok
