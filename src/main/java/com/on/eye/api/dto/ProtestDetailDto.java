@@ -50,6 +50,7 @@ public class ProtestDetailDto {
 
     public static ProtestDetailDto from(Protest protest, List<LocationDto> locations) {
         return ProtestDetailDto.builder()
+                .id(protest.getId())
                 .title(protest.getTitle())
                 .description(protest.getDescription())
                 .location(protest.getLocation())
