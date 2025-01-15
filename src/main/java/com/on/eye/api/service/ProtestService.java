@@ -15,7 +15,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.LocalTime;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
@@ -49,9 +48,8 @@ public class ProtestService {
     @Transactional(readOnly = true)
     public List<ProtestListItemDto> getProtestsBy(LocalDate date) {
         LocalDateTime startOfDay = date.atStartOfDay();
-        LocalDateTime endOfDay = date.atTime(LocalTime.MAX);
 
-        return protestRepository.findByStartDateTimeBetween(startOfDay, endOfDay)
+        return protestRepository.findByStartDateTimeAfter(startOfDay)
                 .stream()
                 .map(protest -> {
                     List<LocationDto> locations = getLocations(protest);
