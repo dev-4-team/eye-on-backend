@@ -16,6 +16,7 @@ import java.util.List;
 public class ProtestListItemDto {
     private final Long id;
     private final String title;
+    private final String description;
 
     @NotNull(message = "startDateTime cannot be null")
     private final LocalDateTime startDateTime;
@@ -33,9 +34,10 @@ public class ProtestListItemDto {
 
     private List<LocationDto> locations;
 
-    public ProtestListItemDto(Long id, String title, LocalDateTime startDateTime, LocalDateTime endDateTime, String location, String organizer, Integer declaredParticipants, ProtestStatus status, List<LocationDto> locations) {
+    public ProtestListItemDto(Long id, String title, String description, LocalDateTime startDateTime, LocalDateTime endDateTime, String location, String organizer, Integer declaredParticipants, ProtestStatus status, List<LocationDto> locations) {
         this.id = id;
         this.title = title;
+        this.description = description;
         this.startDateTime = startDateTime;
         this.endDateTime = endDateTime;
         this.location = location;
@@ -49,6 +51,7 @@ public class ProtestListItemDto {
         return ProtestListItemDto.builder()
                 .id(protest.getId())
                 .title(protest.getTitle())
+                .description(protest.getDescription())
                 .startDateTime(protest.getStartDateTime())
                 .endDateTime(protest.getEndDateTime())
                 .location(protest.getLocation())
