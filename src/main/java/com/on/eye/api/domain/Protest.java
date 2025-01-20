@@ -1,14 +1,15 @@
 package com.on.eye.api.domain;
 
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
+
 import jakarta.persistence.*;
+
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-
-import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
 
 @Entity
 @Table(name = "protests")
@@ -50,7 +51,14 @@ public class Protest {
     private ProtestStatus status = ProtestStatus.SCHEDULED;
 
     @Builder
-    public Protest(String title, String description, LocalDateTime startDateTime, LocalDateTime endDateTime, String location, String organizer, Integer declaredParticipants) {
+    public Protest(
+            String title,
+            String description,
+            LocalDateTime startDateTime,
+            LocalDateTime endDateTime,
+            String location,
+            String organizer,
+            Integer declaredParticipants) {
         this.title = title;
         this.description = description;
         this.startDateTime = startDateTime;
