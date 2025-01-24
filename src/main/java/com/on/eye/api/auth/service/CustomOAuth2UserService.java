@@ -1,13 +1,6 @@
 package com.on.eye.api.auth.service;
 
-import org.springframework.security.oauth2.client.userinfo.DefaultOAuth2UserService;
-import org.springframework.security.oauth2.client.userinfo.OAuth2UserRequest;
-import org.springframework.security.oauth2.core.OAuth2AuthenticationException;
-import org.springframework.security.oauth2.core.user.OAuth2User;
-import org.springframework.stereotype.Service;
-
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.on.eye.api.auth.factory.OAuth2UserInfoFactory;
 import com.on.eye.api.auth.model.KaKaoUserInfoDto;
 import com.on.eye.api.auth.model.dto.CustomOAuth2User;
 import com.on.eye.api.auth.model.entity.OauthInfo;
@@ -15,9 +8,13 @@ import com.on.eye.api.auth.model.entity.Profile;
 import com.on.eye.api.auth.model.entity.User;
 import com.on.eye.api.auth.model.response.KakaoInformationResponse;
 import com.on.eye.api.auth.repository.UserRepository;
-
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.oauth2.client.userinfo.DefaultOAuth2UserService;
+import org.springframework.security.oauth2.client.userinfo.OAuth2UserRequest;
+import org.springframework.security.oauth2.core.OAuth2AuthenticationException;
+import org.springframework.security.oauth2.core.user.OAuth2User;
+import org.springframework.stereotype.Service;
 
 @Service
 @Slf4j
@@ -25,19 +22,16 @@ import lombok.extern.slf4j.Slf4j;
 public class CustomOAuth2UserService extends DefaultOAuth2UserService {
 
     private final UserRepository userRepository;
-    private final OAuth2UserInfoFactory oAuth2UserInfoFactory;
     private final ObjectMapper objectMapper;
 
     @Override
     public OAuth2User loadUser(OAuth2UserRequest userRequest) throws OAuth2AuthenticationException {
-        System.out.println("------loadUser---#$@$@$@$@$@$");
         OAuth2User oAuth2User = super.loadUser(userRequest);
 
-        return processOAuth2User(userRequest, oAuth2User);
+        return processOAuth2User(oAuth2User);
     }
 
-    private CustomOAuth2User processOAuth2User(
-            OAuth2UserRequest userRequest, OAuth2User oAuth2User) {
+    private CustomOAuth2User processOAuth2User(OAuth2User oAuth2User) {
         KakaoInformationResponse kakaoInformationResponse =
                 objectMapper.convertValue(
                         oAuth2User.getAttributes(), KakaoInformationResponse.class);
