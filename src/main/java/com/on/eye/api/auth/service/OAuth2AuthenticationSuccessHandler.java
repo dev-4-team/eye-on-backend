@@ -1,21 +1,21 @@
 package com.on.eye.api.auth.service;
 
-import com.on.eye.api.auth.jwt.JwtTokenProvider;
-import com.on.eye.api.auth.model.dto.CustomOAuth2User;
+import java.io.IOException;
+
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import lombok.extern.slf4j.Slf4j;
+
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpHeaders;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.web.authentication.SimpleUrlAuthenticationSuccessHandler;
 import org.springframework.stereotype.Component;
 import org.springframework.web.util.UriComponentsBuilder;
 
-import java.io.IOException;
+import com.on.eye.api.auth.jwt.JwtTokenProvider;
+import com.on.eye.api.auth.model.dto.CustomOAuth2User;
 
-import static com.on.eye.api.constants.AuthConstants.BEARER;
+import lombok.extern.slf4j.Slf4j;
 
 @Component
 @Slf4j
@@ -41,9 +41,11 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
                 tokenProvider.generateAccessToken(oAuth2User.getId(), authority.getAuthority());
 
         // 프론트엔드로 JWT 토큰과 함께 리다이렉트
-        String targetUrl = UriComponentsBuilder.fromUriString(redirectUrl).build().toUriString();
-
-        response.addHeader(HttpHeaders.AUTHORIZATION, BEARER + token);
+        String targetUrl =
+                UriComponentsBuilder.fromUriString(redirectUrl)
+                        .queryParam("access_token", token)
+                        .build()
+                        .toUriString();
 
         getRedirectStrategy().sendRedirect(request, response, targetUrl);
     }
