@@ -1,14 +1,16 @@
 package com.on.eye.api.helper;
 
-import lombok.RequiredArgsConstructor;
-import org.springframework.core.env.Environment;
-import org.springframework.stereotype.Component;
-import org.springframework.util.CollectionUtils;
-
 import java.util.Arrays;
 import java.util.List;
 
-@Component
+import org.springframework.core.env.Environment;
+import org.springframework.util.CollectionUtils;
+
+import com.on.eye.api.common.annotation.Helper;
+
+import lombok.RequiredArgsConstructor;
+
+@Helper
 @RequiredArgsConstructor
 public class SpringEnvHelper {
     private final Environment environment;

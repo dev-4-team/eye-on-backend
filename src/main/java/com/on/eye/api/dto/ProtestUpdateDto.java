@@ -1,12 +1,14 @@
 package com.on.eye.api.dto;
 
-import com.on.eye.api.domain.ProtestStatus;
+import java.time.LocalDateTime;
+
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
+
+import com.on.eye.api.domain.ProtestStatus;
+
 import lombok.Builder;
 import lombok.Getter;
-
-import java.time.LocalDateTime;
 
 @Getter
 public class ProtestUpdateDto {
@@ -22,7 +24,15 @@ public class ProtestUpdateDto {
     private final ProtestStatus status;
 
     @Builder
-    public ProtestUpdateDto(String title, String description, LocalDateTime startDateTime, LocalDateTime endDateTime, String location, String organizer, Integer declaredParticipants, ProtestStatus status) {
+    public ProtestUpdateDto(
+            String title,
+            String description,
+            LocalDateTime startDateTime,
+            LocalDateTime endDateTime,
+            String location,
+            String organizer,
+            Integer declaredParticipants,
+            ProtestStatus status) {
         this.title = title;
         this.description = description;
         this.startDateTime = startDateTime;

@@ -1,5 +1,21 @@
 package com.on.eye.api;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.util.List;
+import java.util.stream.IntStream;
+
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+
 import com.on.eye.api.domain.Protest;
 import com.on.eye.api.domain.ProtestStatus;
 import com.on.eye.api.dto.ProtestCreateDto;
@@ -9,36 +25,20 @@ import com.on.eye.api.dto.ProtestUpdateDto;
 import com.on.eye.api.exception.ResourceNotFoundException;
 import com.on.eye.api.repository.ProtestRepository;
 import com.on.eye.api.service.ProtestService;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Nested;
-import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.LocalTime;
-import java.util.List;
-import java.util.stream.IntStream;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @SpringBootTest
 class ProtestServiceTest {
-    @Autowired
-    private ProtestService protestService;
+    @Autowired private ProtestService protestService;
 
-    @Autowired
-    private ProtestRepository protestRepository;
+    @Autowired private ProtestRepository protestRepository;
 
     private ProtestCreateDto testProtestDto;
 
     // Test Fixture Pattern
     static class TestProtestFixture {
         static ProtestCreateDto.ProtestCreateDtoBuilder baseBuilder() {
-            LocalDateTime startDateTime = LocalDateTime.of(LocalDate.now().plusDays(1), LocalTime.of(10, 0));
+            LocalDateTime startDateTime =
+                    LocalDateTime.of(LocalDate.now().plusDays(1), LocalTime.of(10, 0));
             return ProtestCreateDto.builder()
                     .title("탄핵 시위")
                     .description("윤석열 탄핵 찬성")
@@ -66,10 +66,12 @@ class ProtestServiceTest {
 
         static List<ProtestCreateDto> createMultipleProtests(int count) {
             return IntStream.range(0, count)
-                    .mapToObj(i -> baseBuilder()
-                            .title("시위 " + (i + 1))
-                            .location("장소 " + (i + 1))
-                            .build())
+                    .mapToObj(
+                            i ->
+                                    baseBuilder()
+                                            .title("시위 " + (i + 1))
+                                            .location("장소 " + (i + 1))
+                                            .build())
                     .toList();
         }
     }
@@ -99,13 +101,14 @@ class ProtestServiceTest {
         Protest savedProtest = protestService.createProtest(testProtestDto);
 
         // When
-        ProtestDetailDto detail =  protestService.getProtestDetail(savedProtest.getId());
+        ProtestDetailDto detail = protestService.getProtestDetail(savedProtest.getId());
 
         // Then
         assertThat(detail).isNotNull();
         assertThat(detail.getTitle()).isEqualTo(testProtestDto.getTitle());
         assertThat(detail.getOrganizer()).isEqualTo(testProtestDto.getOrganizer());
-        assertThat(detail.getDeclaredParticipants()).isEqualTo(testProtestDto.getDeclaredParticipants());
+        assertThat(detail.getDeclaredParticipants())
+                .isEqualTo(testProtestDto.getDeclaredParticipants());
         assertThat(detail.getStatus()).isEqualTo(ProtestStatus.SCHEDULED);
     }
 
@@ -116,16 +119,17 @@ class ProtestServiceTest {
         Protest savedProtest = protestService.createProtest(testProtestDto);
 
         // When
-        ProtestUpdateDto updateDto = ProtestUpdateDto.builder().
-                title("수정된 제목")
-                .description("수정된 설명")
-                .location("국회")
-                .organizer("변경된 주체")
-                .declaredParticipants(1000)
-                .startDateTime(LocalDateTime.now())
-                .build();
+        ProtestUpdateDto updateDto =
+                ProtestUpdateDto.builder()
+                        .title("수정된 제목")
+                        .description("수정된 설명")
+                        .location("국회")
+                        .organizer("변경된 주체")
+                        .declaredParticipants(1000)
+                        .startDateTime(LocalDateTime.now())
+                        .build();
         Long id = protestService.updateProtest(savedProtest.getId(), updateDto);
-        ProtestDetailDto detail =  protestService.getProtestDetail(id);
+        ProtestDetailDto detail = protestService.getProtestDetail(id);
 
         // Then
         assertThat(detail.getTitle()).isEqualTo(updateDto.getTitle());
@@ -144,8 +148,11 @@ class ProtestServiceTest {
         Long invalidId = 1000L;
 
         // When & Then
-        assertThrows(ResourceNotFoundException.class, () -> protestService.updateProtest(invalidId, null));
-        assertThrows(ResourceNotFoundException.class, () -> protestService.getProtestDetail(invalidId));
+        assertThrows(
+                ResourceNotFoundException.class,
+                () -> protestService.updateProtest(invalidId, null));
+        assertThrows(
+                ResourceNotFoundException.class, () -> protestService.getProtestDetail(invalidId));
     }
 
     @Nested
@@ -156,17 +163,18 @@ class ProtestServiceTest {
         @BeforeEach
         void setup() {
             protestRepository.deleteAll();
-            testProtests = TestProtestFixture.createMultipleProtests(5)
-                    .stream()
-                    .map(protestService::createProtest)
-                    .toList();
+            testProtests =
+                    TestProtestFixture.createMultipleProtests(5).stream()
+                            .map(protestService::createProtest)
+                            .toList();
         }
 
         @Test
         @DisplayName("성공: 날짜 기준 시위 목록 조회 - 오늘")
         void getProtestsByDate() {
             // Given
-            LocalDateTime twoDaysAfter = LocalDateTime.of(LocalDate.now().plusDays(2), LocalTime.of(10, 0));
+            LocalDateTime twoDaysAfter =
+                    LocalDateTime.of(LocalDate.now().plusDays(2), LocalTime.of(10, 0));
             ProtestCreateDto diffDto = TestProtestFixture.createWithStartDateTime(twoDaysAfter);
             protestService.createProtest(diffDto);
 

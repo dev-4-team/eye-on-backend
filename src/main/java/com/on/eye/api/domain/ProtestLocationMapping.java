@@ -1,6 +1,7 @@
 package com.on.eye.api.domain;
 
 import jakarta.persistence.*;
+
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
@@ -9,10 +10,7 @@ import lombok.NoArgsConstructor;
 @Entity
 @Table(
         name = "protest_location_mappings",
-        uniqueConstraints = {
-                @UniqueConstraint(columnNames = {"protest_id", "sequence"})
-        }
-)
+        uniqueConstraints = {@UniqueConstraint(columnNames = {"protest_id", "sequence"})})
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class ProtestLocationMapping {

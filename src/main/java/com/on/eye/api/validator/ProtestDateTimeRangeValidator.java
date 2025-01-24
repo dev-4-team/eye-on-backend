@@ -1,16 +1,20 @@
 package com.on.eye.api.validator;
 
-import com.on.eye.api.dto.ProtestCreateDto;
-import jakarta.validation.ConstraintValidator;
 import java.time.Duration;
 
+import jakarta.validation.ConstraintValidator;
 import jakarta.validation.ConstraintValidatorContext;
 
-public class ProtestDateTimeRangeValidator implements ConstraintValidator<ValidProtestDateTimeRange, ProtestCreateDto> {
+import com.on.eye.api.dto.ProtestCreateDto;
+
+public class ProtestDateTimeRangeValidator
+        implements ConstraintValidator<ValidProtestDateTimeRange, ProtestCreateDto> {
     @Override
     public boolean isValid(ProtestCreateDto createDto, ConstraintValidatorContext context) {
-            
-        if (createDto == null || createDto.getStartDateTime() == null || createDto.getEndDateTime() == null) {
+
+        if (createDto == null
+                || createDto.getStartDateTime() == null
+                || createDto.getEndDateTime() == null) {
             return false; // Invalid if any of the fields are null
         }
         if (isInvalidTimePriority(createDto)) return false;
@@ -18,7 +22,9 @@ public class ProtestDateTimeRangeValidator implements ConstraintValidator<ValidP
     }
 
     private boolean isInValidTimeDiff(ProtestCreateDto createDto) {
-        long hoursDifference = Duration.between(createDto.getStartDateTime(), createDto.getEndDateTime()).toHours();
+        long hoursDifference =
+                Duration.between(createDto.getStartDateTime(), createDto.getEndDateTime())
+                        .toHours();
         return hoursDifference < 1 || hoursDifference > 24;
     }
 

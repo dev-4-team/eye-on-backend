@@ -1,6 +1,28 @@
 spring:
   config:
     import: optional:file:.env[.properties]
+  application:
+    name: api
+  security:
+    oauth2:
+      client:
+        registration:
+          kakao:
+            client-name: kakao
+            client-id: ${KAKAO_CLIENT_ID}
+            client-authentication-method: client_secret_post
+            authorization-grant-type: authorization_code
+            redirect-uri: "http://localhost:8080/login/oauth2/code/kakao"
+            scope:
+              - profile_nickname
+              - profile_image
+        #              - account_email
+        provider:
+          kakao:
+            authorization-uri: https://kauth.kakao.com/oauth/authorize
+            token-uri: https://kauth.kakao.com/oauth/token
+            user-info-uri: https://kapi.kakao.com/v2/user/me
+            user-name-attribute: id
   datasource:
     hikari:
       driver-class-name: org.postgresql.Driver
@@ -12,8 +34,6 @@ spring:
     driver-class-name: org.postgresql.Driver
     username: ${DB_USERNAME}
     url: ${DB_URL}
-  application:
-    name: api
   jpa:
     show-sql: 'true'
     properties:
@@ -26,6 +46,15 @@ spring:
       ddl-auto: update
     defer-datasource-initialization: 'true'
 
+auth:
+  jwt:
+    secret-key: ${JWT_SECRET_KEY}
+    expiration: 3600000 # 1 day
+    refresh-expiration: 604800000 # 1 week
+app:
+  oauth2:
+    redirectUri: ${OAUTH2_REDIRECT_URI}
+
 logging:
   level:
     web: DEBUG
@@ -33,3 +62,7 @@ logging:
     com.zaxxer.hikari: TRACE
     org.springframework.orm.jpa: DEBUG
     org.springframework.transaction: DEBUG
+    org.springframework.security: DEBUG
+    org.springframework.web.client.RestTemplate: DEBUG
+    org.springframework.security.web.FilterChainProxy: DEBUG
+    org.springframework.security.web.authentication.OAuth2LoginAuthenticationFilter: TRACE

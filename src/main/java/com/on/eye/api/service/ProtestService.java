@@ -1,5 +1,14 @@
 package com.on.eye.api.service;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Optional;
+
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 import com.on.eye.api.domain.Location;
 import com.on.eye.api.domain.Protest;
 import com.on.eye.api.domain.ProtestLocationMapping;
@@ -9,15 +18,8 @@ import com.on.eye.api.mapper.ProtestMapper;
 import com.on.eye.api.repository.LocationRepository;
 import com.on.eye.api.repository.ProtestRepository;
 import com.on.eye.api.util.Constants;
-import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Optional;
+import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
@@ -49,12 +51,12 @@ public class ProtestService {
     public List<ProtestListItemDto> getProtestsBy(LocalDate date) {
         LocalDateTime startOfDay = date.atStartOfDay();
 
-        return protestRepository.findByStartDateTimeAfter(startOfDay)
-                .stream()
-                .map(protest -> {
-                    List<LocationDto> locations = getLocations(protest);
-                    return ProtestListItemDto.from(protest, locations);
-                })
+        return protestRepository.findByStartDateTimeAfter(startOfDay).stream()
+                .map(
+                        protest -> {
+                            List<LocationDto> locations = getLocations(protest);
+                            return ProtestListItemDto.from(protest, locations);
+                        })
                 .toList();
     }
 
@@ -79,14 +81,17 @@ public class ProtestService {
             Optional.ofNullable(updateDto.getStartDateTime()).ifPresent(protest::setStartDateTime);
             Optional.ofNullable(updateDto.getEndDateTime()).ifPresent(protest::setEndDateTime);
             Optional.ofNullable(updateDto.getLocation()).ifPresent(protest::setLocation);
-            Optional.ofNullable(updateDto.getDeclaredParticipants()).ifPresent(protest::setDeclaredParticipants);
+            Optional.ofNullable(updateDto.getDeclaredParticipants())
+                    .ifPresent(protest::setDeclaredParticipants);
             Optional.ofNullable(updateDto.getOrganizer()).ifPresent(protest::setOrganizer);
             Optional.ofNullable(updateDto.getStatus()).ifPresent(protest::setStatus);
         }
     }
 
     private Protest getProtestById(Long id) {
-        return protestRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException(RESOURCE_NAME, Constants.ID, id));
+        return protestRepository
+                .findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException(RESOURCE_NAME, Constants.ID, id));
     }
 
     private void setLocationMappings(Protest protest, ProtestCreateDto protestCreateDto) {
@@ -101,22 +106,25 @@ public class ProtestService {
     }
 
     private Location getOrCreateLocation(LocationDto locationDto) {
-        return locationRepository.findByName(locationDto.getLocationName())
-                .orElseGet(() -> locationRepository.save(
-                        Location.builder()
-                                .name(locationDto.getLocationName())
-                                .latitude(locationDto.getLatitude())
-                                .longitude(locationDto.getLongitude())
-                                .build()
-                ));
+        return locationRepository
+                .findByName(locationDto.getLocationName())
+                .orElseGet(
+                        () ->
+                                locationRepository.save(
+                                        Location.builder()
+                                                .name(locationDto.getLocationName())
+                                                .latitude(locationDto.getLatitude())
+                                                .longitude(locationDto.getLongitude())
+                                                .build()));
     }
 
     private void createAndAddMapping(Protest protest, Location location, int sequence) {
-        ProtestLocationMapping mapping = ProtestLocationMapping.builder()
-                .protest(protest)
-                .location(location)
-                .sequence(sequence)
-                .build();
+        ProtestLocationMapping mapping =
+                ProtestLocationMapping.builder()
+                        .protest(protest)
+                        .location(location)
+                        .sequence(sequence)
+                        .build();
 
         protest.getLocationMappings().add(mapping);
     }

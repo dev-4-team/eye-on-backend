@@ -1,15 +1,15 @@
 package com.on.eye.api.dto;
 
-
-import com.on.eye.api.validator.ValidProtestDateTimeRange;
-import jakarta.validation.constraints.*;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-
 import java.time.LocalDateTime;
 import java.util.List;
 
+import jakarta.validation.constraints.*;
+
+import com.on.eye.api.validator.ValidProtestDateTimeRange;
+
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 @Getter
 @NoArgsConstructor
@@ -41,9 +41,15 @@ public class ProtestCreateDto {
     private List<LocationDto> locations;
 
     @Builder
-    public ProtestCreateDto(String title, String description, LocalDateTime startDateTime, LocalDateTime endDateTime,
-                            String location, String organizer, Integer declaredParticipants,
-                            List<LocationDto> locations) {
+    public ProtestCreateDto(
+            String title,
+            String description,
+            LocalDateTime startDateTime,
+            LocalDateTime endDateTime,
+            String location,
+            String organizer,
+            Integer declaredParticipants,
+            List<LocationDto> locations) {
         this.title = title;
         this.description = description;
         this.startDateTime = startDateTime;

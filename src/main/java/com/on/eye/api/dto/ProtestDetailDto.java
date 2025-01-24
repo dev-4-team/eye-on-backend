@@ -1,20 +1,23 @@
 package com.on.eye.api.dto;
 
-import com.on.eye.api.domain.Protest;
-import com.on.eye.api.domain.ProtestStatus;
+import java.time.LocalDateTime;
+import java.util.List;
+
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import jakarta.validation.constraints.NotNull;
+
+import com.on.eye.api.domain.Protest;
+import com.on.eye.api.domain.ProtestStatus;
+
 import lombok.Builder;
 import lombok.Getter;
-
-import java.time.LocalDateTime;
-import java.util.List;
 
 @Getter
 public class ProtestDetailDto {
     @NotNull(message = "id cannot be null")
     private final Long id;
+
     private final String title;
     private final String description;
 
@@ -23,6 +26,7 @@ public class ProtestDetailDto {
 
     @NotNull(message = "endDateTime cannot be null")
     private final LocalDateTime endDateTime;
+
     private final String location;
     private final String organizer;
 
@@ -35,7 +39,17 @@ public class ProtestDetailDto {
     private final List<LocationDto> locations;
 
     @Builder
-    public ProtestDetailDto(Long id, String title, String description, LocalDateTime startDateTime, LocalDateTime endDateTime, String location, String organizer, Integer declaredParticipants, ProtestStatus status, List<LocationDto> locations) {
+    public ProtestDetailDto(
+            Long id,
+            String title,
+            String description,
+            LocalDateTime startDateTime,
+            LocalDateTime endDateTime,
+            String location,
+            String organizer,
+            Integer declaredParticipants,
+            ProtestStatus status,
+            List<LocationDto> locations) {
         this.id = id;
         this.title = title;
         this.description = description;
