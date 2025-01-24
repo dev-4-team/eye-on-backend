@@ -20,8 +20,8 @@ public class KakaoInformationResponse {
     @JsonNaming(SnakeCaseStrategy.class)
     public static class Properties {
         private String nickname;
-        private String profileImageUrl;
-        private String thumbnailImageUrl;
+        private String profileImage;
+        private String thumbnailImage;
     }
 
     @Getter

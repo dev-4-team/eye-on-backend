@@ -24,7 +24,7 @@ public class KaKaoUserInfoDto {
         return KaKaoUserInfoDto.builder()
                 .authProvider(AuthProvider.KAKAO)
                 .oauthId(response.getId())
-                .profileImage(response.getProperties().getProfileImageUrl())
+                .profileImage(response.getProperties().getProfileImage())
                 .nickname(response.getProperties().getNickname())
                 .build();
     }
