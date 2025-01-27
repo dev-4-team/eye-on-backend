@@ -1,10 +1,9 @@
 package com.on.eye.api.config.security;
 
-import com.on.eye.api.auth.service.CustomOAuth2UserService;
-import com.on.eye.api.auth.service.OAuth2AuthenticationFailureHandler;
-import com.on.eye.api.auth.service.OAuth2AuthenticationSuccessHandler;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
+import static com.on.eye.api.constants.AuthConstants.ALLOW_URLS;
+
+import java.util.Arrays;
+
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.access.hierarchicalroles.RoleHierarchy;
@@ -21,9 +20,12 @@ import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
-import java.util.Arrays;
+import com.on.eye.api.auth.service.CustomOAuth2UserService;
+import com.on.eye.api.auth.service.OAuth2AuthenticationFailureHandler;
+import com.on.eye.api.auth.service.OAuth2AuthenticationSuccessHandler;
 
-import static com.on.eye.api.constants.AuthConstants.ALLOW_URLS;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 @Configuration
 @EnableWebSecurity
@@ -104,8 +106,7 @@ public class SecurityConfig {
                         "Content-Type",
                         "Accept",
                         "Origin",
-                        "X-Requested-With"
-                ));
+                        "X-Requested-With"));
         configuration.setAllowCredentials(true);
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();

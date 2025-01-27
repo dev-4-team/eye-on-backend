@@ -1,5 +1,11 @@
 package com.on.eye.api.auth.service;
 
+import org.springframework.security.oauth2.client.userinfo.DefaultOAuth2UserService;
+import org.springframework.security.oauth2.client.userinfo.OAuth2UserRequest;
+import org.springframework.security.oauth2.core.OAuth2AuthenticationException;
+import org.springframework.security.oauth2.core.user.OAuth2User;
+import org.springframework.stereotype.Service;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.on.eye.api.auth.model.KaKaoUserInfoDto;
 import com.on.eye.api.auth.model.dto.CustomOAuth2User;
@@ -8,13 +14,9 @@ import com.on.eye.api.auth.model.entity.Profile;
 import com.on.eye.api.auth.model.entity.User;
 import com.on.eye.api.auth.model.response.KakaoInformationResponse;
 import com.on.eye.api.auth.repository.UserRepository;
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.security.oauth2.client.userinfo.DefaultOAuth2UserService;
-import org.springframework.security.oauth2.client.userinfo.OAuth2UserRequest;
-import org.springframework.security.oauth2.core.OAuth2AuthenticationException;
-import org.springframework.security.oauth2.core.user.OAuth2User;
-import org.springframework.stereotype.Service;
 
 @Service
 @Slf4j
