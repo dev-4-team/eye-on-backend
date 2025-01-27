@@ -10,6 +10,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import com.on.eye.api.domain.Protest;
 import com.on.eye.api.dto.ProtestCreateDto;
 import com.on.eye.api.dto.ProtestDetailDto;
 import com.on.eye.api.dto.ProtestListItemDto;
@@ -25,10 +26,13 @@ public class ProtestController {
     private final ProtestService protestService;
 
     @PostMapping
-    public ResponseEntity<Long> createProtest(
-            @Valid @RequestBody ProtestCreateDto protestCreateDto) {
+    public ResponseEntity<List<Long>> createProtest(
+            @Valid @RequestBody List<ProtestCreateDto> protestCreateDto) {
         return ResponseEntity.status(HttpStatus.CREATED)
-                .body(protestService.createProtest(protestCreateDto).getId());
+                .body(
+                        protestService.createProtest(protestCreateDto).stream()
+                                .map(Protest::getId)
+                                .toList());
     }
 
     @GetMapping("/{id}")

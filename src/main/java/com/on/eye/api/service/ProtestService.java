@@ -28,14 +28,17 @@ public class ProtestService {
     private final LocationRepository locationRepository;
     private static final String RESOURCE_NAME = "Protest";
 
-    public Protest createProtest(ProtestCreateDto protestCreateDto) {
+    public List<Protest> createProtest(List<ProtestCreateDto> protestCreateDtos) {
         // 생성 시간 기준으로 상태 자동 설정
-        Protest protest = ProtestMapper.toEntity(protestCreateDto);
+        List<ProtestCreateMapping> protestCreateMappings =
+                ProtestMapper.toEntity(protestCreateDtos);
 
         // set locations using locationDto
-        setLocationMappings(protest, protestCreateDto);
+        setLocationMappings(protestCreateMappings);
         // ProtestLocationMapping도 Casacade 설정으로 함께 저장됨
-        return protestRepository.save(protest);
+        List<Protest> protests =
+                protestCreateMappings.stream().map(ProtestCreateMapping::getProtest).toList();
+        return protestRepository.saveAll(protests);
     }
 
     @Transactional(readOnly = true)
@@ -94,14 +97,18 @@ public class ProtestService {
                 .orElseThrow(() -> new ResourceNotFoundException(RESOURCE_NAME, Constants.ID, id));
     }
 
-    private void setLocationMappings(Protest protest, ProtestCreateDto protestCreateDto) {
+    private void setLocationMappings(List<ProtestCreateMapping> protestCreateMappings) {
         int sequence = 0;
-        for (LocationDto locationDto : protestCreateDto.getLocations()) {
-            // Retrieve or create location
-            Location location = getOrCreateLocation(locationDto);
+        for (ProtestCreateMapping mapping : protestCreateMappings) {
+            Protest protest = mapping.getProtest();
+            ProtestCreateDto protestCreateDto = mapping.getProtestCreateDto();
+            for (LocationDto locationDto : protestCreateDto.getLocations()) {
+                // Retrieve or create location
+                Location location = getOrCreateLocation(locationDto);
 
-            // Create and add mapping
-            createAndAddMapping(protest, location, sequence++);
+                // Create and add mapping
+                createAndAddMapping(protest, location, sequence++);
+            }
         }
     }
 
