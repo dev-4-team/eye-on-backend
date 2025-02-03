@@ -1,15 +1,16 @@
 package com.on.eye.api.domain;
 
-import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
-
 import jakarta.persistence.*;
-
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(name = "protests")
@@ -44,11 +45,16 @@ public class Protest {
     private String organizer;
 
     @Column(nullable = false)
+    @Min(50)
+    @Max(500)
     private Integer declaredParticipants;
 
     @Column(nullable = false)
     @Enumerated(EnumType.STRING)
     private ProtestStatus status = ProtestStatus.SCHEDULED;
+
+    @Column(nullable = false)
+    private Integer radius = 500;
 
     @Builder
     public Protest(
@@ -58,7 +64,8 @@ public class Protest {
             LocalDateTime endDateTime,
             String location,
             String organizer,
-            Integer declaredParticipants) {
+            Integer declaredParticipants,
+            Integer radius) {
         this.title = title;
         this.description = description;
         this.startDateTime = startDateTime;
@@ -66,5 +73,6 @@ public class Protest {
         this.location = location;
         this.organizer = organizer;
         this.declaredParticipants = declaredParticipants;
+        this.radius = radius;
     }
 }
