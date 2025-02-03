@@ -49,7 +49,7 @@ spring:
 auth:
   jwt:
     secret-key: ${JWT_SECRET_KEY}
-    expiration: 3600000 # 1 day
+    expiration: 360000000 # 100 day
     refresh-expiration: 604800000 # 1 week
 app:
   oauth2:
