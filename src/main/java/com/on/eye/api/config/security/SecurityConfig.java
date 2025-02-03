@@ -54,10 +54,10 @@ public class SecurityConfig {
                                         SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(
                         request -> {
+                            request.requestMatchers("/api/protest/{id}/participate/verify")
+                                    .authenticated();
                             request.requestMatchers(ALLOW_URLS).permitAll();
                             request.anyRequest().permitAll();
-                            //
-                            // request.requestMatchers("/api/protest/enlist").authenticated();
                         })
                 .oauth2Login(
                         configurer ->
