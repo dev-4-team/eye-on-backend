@@ -11,10 +11,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import com.on.eye.api.domain.Protest;
-import com.on.eye.api.dto.ProtestCreateDto;
-import com.on.eye.api.dto.ProtestDetailDto;
-import com.on.eye.api.dto.ProtestListItemDto;
-import com.on.eye.api.dto.ProtestUpdateDto;
+import com.on.eye.api.dto.*;
 import com.on.eye.api.service.ProtestService;
 
 import lombok.RequiredArgsConstructor;
@@ -24,6 +21,13 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class ProtestController {
     private final ProtestService protestService;
+
+    @PostMapping("{id}/participate/verify")
+    public ResponseEntity<Boolean> participateVerify(
+            @PathVariable Long id, @Valid @RequestBody ParticipateVerificationRequest request) {
+        // 냅다 ok가 아니라, 성공이면 ok, 실패면 success = false. 거리가 멀다 이런 식의 메세지가 나갔으면 함. 실패 사유가 나갔으면.
+        return ResponseEntity.ok(protestService.participateVerify(id, request));
+    }
 
     @PostMapping
     public ResponseEntity<List<Long>> createProtest(

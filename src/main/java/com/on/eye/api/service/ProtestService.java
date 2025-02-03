@@ -1,32 +1,41 @@
 package com.on.eye.api.service;
 
+import com.on.eye.api.auth.model.entity.User;
+import com.on.eye.api.auth.repository.UserRepository;
+import com.on.eye.api.config.security.SecurityUtils;
+import com.on.eye.api.domain.Location;
+import com.on.eye.api.domain.ParticipantsVerification;
+import com.on.eye.api.domain.Protest;
+import com.on.eye.api.domain.ProtestLocationMapping;
+import com.on.eye.api.dto.*;
+import com.on.eye.api.exception.DuplicateVerificationException;
+import com.on.eye.api.exception.OutOfValidProtestRangeException;
+import com.on.eye.api.exception.ResourceNotFoundException;
+import com.on.eye.api.mapper.ProtestMapper;
+import com.on.eye.api.repository.LocationRepository;
+import com.on.eye.api.repository.ParticipantVerificationRepository;
+import com.on.eye.api.repository.ProtestRepository;
+import com.on.eye.api.util.Constants;
+import lombok.RequiredArgsConstructor;
+import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
-import com.on.eye.api.domain.Location;
-import com.on.eye.api.domain.Protest;
-import com.on.eye.api.domain.ProtestLocationMapping;
-import com.on.eye.api.dto.*;
-import com.on.eye.api.exception.ResourceNotFoundException;
-import com.on.eye.api.mapper.ProtestMapper;
-import com.on.eye.api.repository.LocationRepository;
-import com.on.eye.api.repository.ProtestRepository;
-import com.on.eye.api.util.Constants;
-
-import lombok.RequiredArgsConstructor;
-
 @Service
 @RequiredArgsConstructor
 public class ProtestService {
     private final ProtestRepository protestRepository;
     private final LocationRepository locationRepository;
-    private static final String RESOURCE_NAME = "Protest";
+    private final UserRepository userRepository;
+    private final ParticipantVerificationRepository participantVerificationRepository;
+    private static final String PROTEST = "Protest";
+    private static final String LOCATION = "Location";
 
     public List<Protest> createProtest(List<ProtestCreateDto> protestCreateDtos) {
         // 생성 시간 기준으로 상태 자동 설정
@@ -94,7 +103,7 @@ public class ProtestService {
     private Protest getProtestById(Long id) {
         return protestRepository
                 .findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException(RESOURCE_NAME, Constants.ID, id));
+                .orElseThrow(() -> new ResourceNotFoundException(PROTEST, Constants.ID, id));
     }
 
     private void setLocationMappings(List<ProtestCreateMapping> protestCreateMappings) {
@@ -141,5 +150,44 @@ public class ProtestService {
                 .sorted(Comparator.comparing(ProtestLocationMapping::getSequence))
                 .map(mapping -> LocationDto.from(mapping.getLocation()))
                 .toList();
+    }
+
+    private ProtestLocationDto getProtestLocationDto(Protest protest) {
+        Long id = protest.getId();
+        return locationRepository
+                .findFirstLocationByProtestId(id)
+                .orElseThrow(() -> new ResourceNotFoundException(PROTEST, Constants.ID, id));
+    }
+
+    public Boolean participateVerify(Long protestId, ParticipateVerificationRequest request) {
+        Long userId = SecurityUtils.getCurrentUserId();
+        Protest protest = getProtestById(protestId);
+
+        ProtestLocationDto protestLocationDto = getProtestLocationDto(protest);
+
+        Double distance =
+                locationRepository.calculateDistance(
+                        request.getLatitude(),
+                        request.getLongitude(),
+                        protestLocationDto.locationId());
+
+        if (distance == null)
+            throw new ResourceNotFoundException(
+                    LOCATION, Constants.ID, protestLocationDto.locationId());
+
+        boolean isWithInRadius = distance <= protest.getRadius();
+
+        if (!isWithInRadius) throw OutOfValidProtestRangeException.EXCEPTION;
+
+        User userRef = userRepository.getReferenceById(userId);
+        try {
+            ParticipantsVerification verification =
+                    ParticipantsVerification.builder().user(userRef).protest(protest).build();
+            participantVerificationRepository.save(verification);
+        } catch (DataIntegrityViolationException e) {
+            throw DuplicateVerificationException.EXCEPTION;
+        }
+
+        return true;
     }
 }
