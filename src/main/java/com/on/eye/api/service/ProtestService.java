@@ -13,10 +13,7 @@ import org.springframework.transaction.annotation.Transactional;
 import com.on.eye.api.auth.model.entity.User;
 import com.on.eye.api.auth.repository.UserRepository;
 import com.on.eye.api.config.security.SecurityUtils;
-import com.on.eye.api.domain.Location;
-import com.on.eye.api.domain.ParticipantsVerification;
-import com.on.eye.api.domain.Protest;
-import com.on.eye.api.domain.ProtestLocationMapping;
+import com.on.eye.api.domain.*;
 import com.on.eye.api.dto.*;
 import com.on.eye.api.exception.DuplicateVerificationException;
 import com.on.eye.api.exception.OutOfValidProtestRangeException;
@@ -25,6 +22,7 @@ import com.on.eye.api.mapper.ProtestMapper;
 import com.on.eye.api.repository.LocationRepository;
 import com.on.eye.api.repository.ParticipantVerificationRepository;
 import com.on.eye.api.repository.ProtestRepository;
+import com.on.eye.api.repository.ProtestVerificationRepository;
 
 import lombok.RequiredArgsConstructor;
 
@@ -35,6 +33,7 @@ public class ProtestService {
     private final LocationRepository locationRepository;
     private final UserRepository userRepository;
     private final ParticipantVerificationRepository participantVerificationRepository;
+    private final ProtestVerificationRepository protestVerificationRepository;
 
     public List<Protest> createProtest(List<ProtestCreateRequest> protestCreateRequests) {
         // 생성 시간 기준으로 상태 자동 설정
@@ -46,6 +45,11 @@ public class ProtestService {
         // ProtestLocationMapping도 Casacade 설정으로 함께 저장됨
         List<Protest> protests =
                 protestCreateMappings.stream().map(ProtestCreateMapping::getProtest).toList();
+        List<ProtestVerification> protestVerifications =
+                protests.stream()
+                        .map(protest -> ProtestVerification.builder().protest(protest).build())
+                        .toList();
+        protestVerificationRepository.saveAll(protestVerifications);
         return protestRepository.saveAll(protests);
     }
 
@@ -156,6 +160,8 @@ public class ProtestService {
                 .orElseThrow(() -> ProtestNotFoundException.EXCEPTION);
     }
 
+    // TODO: 성능개선 여지 있음
+    @Transactional
     public Boolean participateVerify(Long protestId, ParticipateVerificationRequest request) {
         Long userId = SecurityUtils.getCurrentUserId();
         Protest protest = getProtestById(protestId);
@@ -179,10 +185,22 @@ public class ProtestService {
             ParticipantsVerification verification =
                     ParticipantsVerification.builder().user(userRef).protest(protest).build();
             participantVerificationRepository.save(verification);
+            updateProtestVerification(protest);
         } catch (DataIntegrityViolationException e) {
             throw DuplicateVerificationException.EXCEPTION;
         }
 
         return true;
+    }
+
+    private void updateProtestVerification(Protest protest) {
+        int updatedCount = protestVerificationRepository.increaseVerifiedNum(protest.getId());
+
+        if (updatedCount == 0) {
+            ProtestVerification protestVerification =
+                    ProtestVerification.builder().protest(protest).build();
+            protestVerificationRepository.save(protestVerification);
+            protestVerificationRepository.increaseVerifiedNum(protest.getId());
+        }
     }
 }
