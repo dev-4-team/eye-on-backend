@@ -5,7 +5,6 @@ import static com.on.eye.api.exception.GlobalErrorCode.ACCESS_TOKEN_NOT_EXIST;
 
 import java.io.IOException;
 import java.nio.file.AccessDeniedException;
-import java.util.Map;
 
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -13,14 +12,13 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
 import org.springframework.http.MediaType;
-import org.springframework.security.authentication.AuthenticationTrustResolver;
-import org.springframework.security.authentication.AuthenticationTrustResolverImpl;
+import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Component;
 import org.springframework.util.PatternMatchUtils;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.on.eye.api.dto.ApiResponse;
+import com.on.eye.api.dto.ErrorResponse;
 import com.on.eye.api.exception.BaseErrorCode;
 import com.on.eye.api.exception.CustomCodeException;
 
@@ -32,8 +30,6 @@ public class AccessDeniedFilter extends OncePerRequestFilter {
 
     private final ObjectMapper objectMapper;
 
-    private final AuthenticationTrustResolver trustResolver = new AuthenticationTrustResolverImpl();
-
     @Override
     protected boolean shouldNotFilter(HttpServletRequest request) throws ServletException {
         String servletPath = request.getServletPath();
@@ -42,7 +38,9 @@ public class AccessDeniedFilter extends OncePerRequestFilter {
 
     @Override
     protected void doFilterInternal(
-            HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
+            @NonNull HttpServletRequest request,
+            @NonNull HttpServletResponse response,
+            FilterChain filterChain)
             throws ServletException, IOException {
         try {
             filterChain.doFilter(request, response);
@@ -51,23 +49,21 @@ public class AccessDeniedFilter extends OncePerRequestFilter {
                     response,
                     getErrorResponse(e.getErrorCode(), request.getRequestURL().toString()));
         } catch (AccessDeniedException e) {
-            ApiResponse<Map<String, String>> errorResponse =
+            ErrorResponse errorResponse =
                     getErrorResponse(ACCESS_TOKEN_NOT_EXIST, request.getRequestURL().toString());
             responseToClient(response, errorResponse);
         }
     }
 
-    private ApiResponse<Map<String, String>> getErrorResponse(
-            BaseErrorCode errorCode, String path) {
-        return new ApiResponse<>(errorCode.getErrorReason(), path);
+    private ErrorResponse getErrorResponse(BaseErrorCode errorCode, String path) {
+        return new ErrorResponse(errorCode.getErrorReason(), path);
     }
 
-    private void responseToClient(
-            HttpServletResponse response, ApiResponse<Map<String, String>> errorResponse)
+    private void responseToClient(HttpServletResponse response, ErrorResponse errorResponse)
             throws IOException {
         response.setCharacterEncoding("UTF-8");
         response.setContentType(MediaType.APPLICATION_JSON_VALUE);
-        response.setStatus(errorResponse.getStatus());
+        response.setStatus(errorResponse.status());
         response.getWriter().write(objectMapper.writeValueAsString(errorResponse));
     }
 }
