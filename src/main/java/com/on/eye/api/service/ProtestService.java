@@ -1,5 +1,15 @@
 package com.on.eye.api.service;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Optional;
+
+import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 import com.on.eye.api.auth.model.entity.User;
 import com.on.eye.api.auth.repository.UserRepository;
 import com.on.eye.api.config.security.SecurityUtils;
@@ -10,22 +20,13 @@ import com.on.eye.api.domain.ProtestLocationMapping;
 import com.on.eye.api.dto.*;
 import com.on.eye.api.exception.DuplicateVerificationException;
 import com.on.eye.api.exception.OutOfValidProtestRangeException;
-import com.on.eye.api.exception.ResourceNotFoundException;
+import com.on.eye.api.exception.ProtestNotFoundException;
 import com.on.eye.api.mapper.ProtestMapper;
 import com.on.eye.api.repository.LocationRepository;
 import com.on.eye.api.repository.ParticipantVerificationRepository;
 import com.on.eye.api.repository.ProtestRepository;
-import com.on.eye.api.util.Constants;
-import lombok.RequiredArgsConstructor;
-import org.springframework.dao.DataIntegrityViolationException;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Optional;
+import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
@@ -34,8 +35,6 @@ public class ProtestService {
     private final LocationRepository locationRepository;
     private final UserRepository userRepository;
     private final ParticipantVerificationRepository participantVerificationRepository;
-    private static final String PROTEST = "Protest";
-    private static final String LOCATION = "Location";
 
     public List<Protest> createProtest(List<ProtestCreateDto> protestCreateDtos) {
         // 생성 시간 기준으로 상태 자동 설정
@@ -101,9 +100,7 @@ public class ProtestService {
     }
 
     private Protest getProtestById(Long id) {
-        return protestRepository
-                .findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException(PROTEST, Constants.ID, id));
+        return protestRepository.findById(id).orElseThrow(() -> ProtestNotFoundException.EXCEPTION);
     }
 
     private void setLocationMappings(List<ProtestCreateMapping> protestCreateMappings) {
@@ -156,7 +153,7 @@ public class ProtestService {
         Long id = protest.getId();
         return locationRepository
                 .findFirstLocationByProtestId(id)
-                .orElseThrow(() -> new ResourceNotFoundException(PROTEST, Constants.ID, id));
+                .orElseThrow(() -> ProtestNotFoundException.EXCEPTION);
     }
 
     public Boolean participateVerify(Long protestId, ParticipateVerificationRequest request) {
@@ -171,9 +168,7 @@ public class ProtestService {
                         request.getLongitude(),
                         protestLocationDto.locationId());
 
-        if (distance == null)
-            throw new ResourceNotFoundException(
-                    LOCATION, Constants.ID, protestLocationDto.locationId());
+        if (distance == null) throw ProtestNotFoundException.EXCEPTION;
 
         boolean isWithInRadius = distance <= protest.getRadius();
 

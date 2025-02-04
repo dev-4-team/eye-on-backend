@@ -4,6 +4,6 @@ public class DuplicateVerificationException extends CustomCodeException {
     public static final CustomCodeException EXCEPTION = new DuplicateVerificationException();
 
     private DuplicateVerificationException() {
-        super(GlobalErrorCode.DUPLICATED_VERIFICATION);
+        super(ProtestErrorCode.DUPLICATED_VERIFICATION);
     }
 }
