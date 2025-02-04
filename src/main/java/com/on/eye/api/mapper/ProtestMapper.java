@@ -1,16 +1,15 @@
 package com.on.eye.api.mapper;
 
+import java.util.List;
+
 import com.on.eye.api.domain.Protest;
 import com.on.eye.api.dto.ProtestCreateDto;
 import com.on.eye.api.dto.ProtestCreateMapping;
 import com.on.eye.api.dto.ProtestDetailDto;
 
-import java.util.List;
-
 public class ProtestMapper {
 
-    private ProtestMapper() {
-    }
+    private ProtestMapper() {}
 
     public static List<ProtestCreateMapping> toEntity(List<ProtestCreateDto> protestCreateDtos) {
         return protestCreateDtos.stream()
@@ -26,7 +25,10 @@ public class ProtestMapper {
                                             .organizer(protestCreateDto.getOrganizer())
                                             .declaredParticipants(
                                                     protestCreateDto.getDeclaredParticipants())
-                                            .radius(calRadius(protestCreateDto.getDeclaredParticipants()))
+                                            .radius(
+                                                    calRadius(
+                                                            protestCreateDto
+                                                                    .getDeclaredParticipants()))
                                             .build();
                             return new ProtestCreateMapping(protestCreateDto, protest);
                         })

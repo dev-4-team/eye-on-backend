@@ -46,7 +46,7 @@ public class Protest {
     private String organizer;
 
     @Column(nullable = false)
-    @Min(50)
+    @Min(1)
     @Max(500)
     private Integer declaredParticipants;
 
