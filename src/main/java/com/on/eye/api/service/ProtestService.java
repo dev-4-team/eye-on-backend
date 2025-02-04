@@ -36,10 +36,10 @@ public class ProtestService {
     private final UserRepository userRepository;
     private final ParticipantVerificationRepository participantVerificationRepository;
 
-    public List<Protest> createProtest(List<ProtestCreateDto> protestCreateDtos) {
+    public List<Protest> createProtest(List<ProtestCreateRequest> protestCreateRequests) {
         // 생성 시간 기준으로 상태 자동 설정
         List<ProtestCreateMapping> protestCreateMappings =
-                ProtestMapper.toEntity(protestCreateDtos);
+                ProtestMapper.toEntity(protestCreateRequests);
 
         // set locations using locationDto
         setLocationMappings(protestCreateMappings);
@@ -50,23 +50,23 @@ public class ProtestService {
     }
 
     @Transactional(readOnly = true)
-    public ProtestDetailDto getProtestDetail(Long id) {
+    public ProtestResponse getProtestDetail(Long id) {
         Protest protest = getProtestById(id);
 
-        List<LocationDto> locations = getLocations(protest);
+        List<LocationResponse> locations = getLocations(protest);
 
-        return ProtestDetailDto.from(protest, locations);
+        return ProtestResponse.from(protest, locations);
     }
 
     @Transactional(readOnly = true)
-    public List<ProtestListItemDto> getProtestsBy(LocalDate date) {
+    public List<ProtestItemResponse> getProtestsBy(LocalDate date) {
         LocalDateTime startOfDay = date.atStartOfDay();
 
         return protestRepository.findByStartDateTimeAfter(startOfDay).stream()
                 .map(
                         protest -> {
-                            List<LocationDto> locations = getLocations(protest);
-                            return ProtestListItemDto.from(protest, locations);
+                            List<LocationResponse> locations = getLocations(protest);
+                            return ProtestItemResponse.from(protest, locations);
                         })
                 .toList();
     }
@@ -107,8 +107,8 @@ public class ProtestService {
         int sequence = 0;
         for (ProtestCreateMapping mapping : protestCreateMappings) {
             Protest protest = mapping.getProtest();
-            ProtestCreateDto protestCreateDto = mapping.getProtestCreateDto();
-            for (LocationDto locationDto : protestCreateDto.getLocations()) {
+            ProtestCreateRequest protestCreateRequest = mapping.getProtestCreateRequest();
+            for (LocationResponse locationDto : protestCreateRequest.locations()) {
                 // Retrieve or create location
                 Location location = getOrCreateLocation(locationDto);
 
@@ -118,16 +118,16 @@ public class ProtestService {
         }
     }
 
-    private Location getOrCreateLocation(LocationDto locationDto) {
+    private Location getOrCreateLocation(LocationResponse locationDto) {
         return locationRepository
-                .findByName(locationDto.getLocationName())
+                .findByName(locationDto.locationName())
                 .orElseGet(
                         () ->
                                 locationRepository.save(
                                         Location.builder()
-                                                .name(locationDto.getLocationName())
-                                                .latitude(locationDto.getLatitude())
-                                                .longitude(locationDto.getLongitude())
+                                                .name(locationDto.locationName())
+                                                .latitude(locationDto.latitude())
+                                                .longitude(locationDto.longitude())
                                                 .build()));
     }
 
@@ -142,10 +142,10 @@ public class ProtestService {
         protest.getLocationMappings().add(mapping);
     }
 
-    private List<LocationDto> getLocations(Protest protest) {
+    private List<LocationResponse> getLocations(Protest protest) {
         return protest.getLocationMappings().stream()
                 .sorted(Comparator.comparing(ProtestLocationMapping::getSequence))
-                .map(mapping -> LocationDto.from(mapping.getLocation()))
+                .map(mapping -> LocationResponse.from(mapping.getLocation()))
                 .toList();
     }
 

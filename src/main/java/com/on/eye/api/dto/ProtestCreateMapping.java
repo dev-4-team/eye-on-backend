@@ -8,6 +8,6 @@ import lombok.Getter;
 @Getter
 @AllArgsConstructor
 public class ProtestCreateMapping {
-    private ProtestCreateDto protestCreateDto;
+    private ProtestCreateRequest protestCreateRequest;
     private Protest protest;
 }

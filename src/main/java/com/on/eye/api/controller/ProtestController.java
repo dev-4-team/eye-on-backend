@@ -40,31 +40,31 @@ public class ProtestController {
 
     @PostMapping
     public ResponseEntity<List<Long>> createProtest(
-            @Valid @RequestBody List<ProtestCreateDto> protestCreateDto) {
+            @Valid @RequestBody List<ProtestCreateRequest> protestCreateRequest) {
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(
-                        protestService.createProtest(protestCreateDto).stream()
+                        protestService.createProtest(protestCreateRequest).stream()
                                 .map(Protest::getId)
                                 .toList());
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<ProtestDetailDto> getProtestDetail(@PathVariable Long id) {
-        ProtestDetailDto protestDetailDto = protestService.getProtestDetail(id);
-        if (protestDetailDto == null) {
+    public ResponseEntity<ProtestResponse> getProtestDetail(@PathVariable Long id) {
+        ProtestResponse protestResponse = protestService.getProtestDetail(id);
+        if (protestResponse == null) {
             return ResponseEntity.notFound().build();
         }
-        return ResponseEntity.ok(protestDetailDto);
+        return ResponseEntity.ok(protestResponse);
     }
 
     @GetMapping
-    public ResponseEntity<List<ProtestListItemDto>> getProtestsBy(
+    public ResponseEntity<List<ProtestItemResponse>> getProtestsBy(
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
                     LocalDate date) {
         if (date == null) {
             date = LocalDate.now();
         }
-        List<ProtestListItemDto> protests = protestService.getProtestsBy(date);
+        List<ProtestItemResponse> protests = protestService.getProtestsBy(date);
         return ResponseEntity.ok(protests);
     }
 

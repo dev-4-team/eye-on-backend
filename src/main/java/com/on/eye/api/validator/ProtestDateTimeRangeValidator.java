@@ -5,16 +5,16 @@ import java.time.Duration;
 import jakarta.validation.ConstraintValidator;
 import jakarta.validation.ConstraintValidatorContext;
 
-import com.on.eye.api.dto.ProtestCreateDto;
+import com.on.eye.api.dto.ProtestCreateRequest;
 
 public class ProtestDateTimeRangeValidator
-        implements ConstraintValidator<ValidProtestDateTimeRange, ProtestCreateDto> {
+        implements ConstraintValidator<ValidProtestDateTimeRange, ProtestCreateRequest> {
     @Override
-    public boolean isValid(ProtestCreateDto createDto, ConstraintValidatorContext context) {
+    public boolean isValid(ProtestCreateRequest createDto, ConstraintValidatorContext context) {
 
         if (createDto == null
-                || createDto.getStartDateTime() == null
-                || createDto.getEndDateTime() == null) {
+                || createDto.startDateTime() == null
+                || createDto.endDateTime() == null) {
             return false; // Invalid if any of the fields are null
         }
         if (isInvalidTimePriority(createDto)) {
@@ -28,14 +28,13 @@ public class ProtestDateTimeRangeValidator
         return !isInValidTimeDiff(createDto);
     }
 
-    private boolean isInValidTimeDiff(ProtestCreateDto createDto) {
+    private boolean isInValidTimeDiff(ProtestCreateRequest createDto) {
         long hoursDifference =
-                Duration.between(createDto.getStartDateTime(), createDto.getEndDateTime())
-                        .toHours();
+                Duration.between(createDto.startDateTime(), createDto.endDateTime()).toHours();
         return hoursDifference < 1 || hoursDifference > 24;
     }
 
-    private boolean isInvalidTimePriority(ProtestCreateDto createDto) {
-        return createDto.getEndDateTime().isBefore(createDto.getStartDateTime());
+    private boolean isInvalidTimePriority(ProtestCreateRequest createDto) {
+        return createDto.endDateTime().isBefore(createDto.startDateTime());
     }
 }
