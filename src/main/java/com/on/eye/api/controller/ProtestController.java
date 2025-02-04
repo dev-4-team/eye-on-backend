@@ -8,8 +8,11 @@ import jakarta.validation.Valid;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.beanvalidation.LocalValidatorFactoryBean;
+import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.*;
 
+import com.on.eye.api.common.annotation.CollectionValidator;
 import com.on.eye.api.domain.Protest;
 import com.on.eye.api.dto.*;
 import com.on.eye.api.service.ProtestService;
@@ -21,6 +24,12 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class ProtestController {
     private final ProtestService protestService;
+    protected final LocalValidatorFactoryBean validator;
+
+    @InitBinder
+    public void initBinder(WebDataBinder binder) {
+        binder.addValidators(new CollectionValidator(validator));
+    }
 
     @PostMapping("{id}/participate/verify")
     public ResponseEntity<Boolean> participateVerify(
