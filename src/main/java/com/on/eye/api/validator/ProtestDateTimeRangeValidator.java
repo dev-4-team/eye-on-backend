@@ -17,7 +17,14 @@ public class ProtestDateTimeRangeValidator
                 || createDto.getEndDateTime() == null) {
             return false; // Invalid if any of the fields are null
         }
-        if (isInvalidTimePriority(createDto)) return false;
+        if (isInvalidTimePriority(createDto)) {
+            context.buildConstraintViolationWithTemplate(
+                            context.getDefaultConstraintMessageTemplate())
+                    .addPropertyNode("startDateTime")
+                    .addPropertyNode("endDateTime")
+                    .addConstraintViolation();
+            return false;
+        }
         return !isInValidTimeDiff(createDto);
     }
 
