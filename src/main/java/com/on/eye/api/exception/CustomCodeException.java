@@ -6,7 +6,7 @@ import lombok.Getter;
 @Getter
 @AllArgsConstructor
 public class CustomCodeException extends RuntimeException {
-    private final BaseErrorCode errorCode;
+    private final transient BaseErrorCode errorCode;
 
     public ErrorReason getErrorReason() {
         return this.errorCode.getErrorReason();
