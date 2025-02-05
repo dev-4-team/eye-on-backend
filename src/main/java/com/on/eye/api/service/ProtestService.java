@@ -1,15 +1,5 @@
 package com.on.eye.api.service;
 
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Optional;
-
-import org.springframework.dao.DataIntegrityViolationException;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
 import com.on.eye.api.auth.model.entity.User;
 import com.on.eye.api.auth.repository.UserRepository;
 import com.on.eye.api.config.security.SecurityUtils;
@@ -23,8 +13,16 @@ import com.on.eye.api.repository.LocationRepository;
 import com.on.eye.api.repository.ParticipantVerificationRepository;
 import com.on.eye.api.repository.ProtestRepository;
 import com.on.eye.api.repository.ProtestVerificationRepository;
-
 import lombok.RequiredArgsConstructor;
+import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -35,7 +33,7 @@ public class ProtestService {
     private final ParticipantVerificationRepository participantVerificationRepository;
     private final ProtestVerificationRepository protestVerificationRepository;
 
-    public List<Protest> createProtest(List<ProtestCreateRequest> protestCreateRequests) {
+    public List<Long> createProtest(List<ProtestCreateRequest> protestCreateRequests) {
         // 생성 시간 기준으로 상태 자동 설정
         List<ProtestCreateMapping> protestCreateMappings =
                 ProtestMapper.toEntity(protestCreateRequests);
@@ -45,12 +43,15 @@ public class ProtestService {
         // ProtestLocationMapping도 Casacade 설정으로 함께 저장됨
         List<Protest> protests =
                 protestCreateMappings.stream().map(ProtestCreateMapping::getProtest).toList();
+
         List<ProtestVerification> protestVerifications =
                 protests.stream()
                         .map(protest -> ProtestVerification.builder().protest(protest).build())
                         .toList();
+        List<Long> response =
+                protestRepository.saveAll(protests).stream().map(Protest::getId).toList();
         protestVerificationRepository.saveAll(protestVerifications);
-        return protestRepository.saveAll(protests);
+        return response;
     }
 
     @Transactional(readOnly = true)
@@ -194,13 +195,28 @@ public class ProtestService {
     }
 
     private void updateProtestVerification(Protest protest) {
-        int updatedCount = protestVerificationRepository.increaseVerifiedNum(protest.getId());
+        protestVerificationRepository.increaseVerifiedNum(protest.getId());
+    }
 
-        if (updatedCount == 0) {
-            ProtestVerification protestVerification =
-                    ProtestVerification.builder().protest(protest).build();
-            protestVerificationRepository.save(protestVerification);
-            protestVerificationRepository.increaseVerifiedNum(protest.getId());
+    public List<ProtestVerificationResponse> getProtestVerifications(
+            Long protestId, LocalDate date) {
+        if (protestId == null) {
+            return protestRepository.findByStartDateTimeAfter(date.atStartOfDay()).stream()
+                    .map(
+                            protest -> {
+                                ProtestVerification protestVerification =
+                                        protestVerificationRepository.findByProtestId(
+                                                protest.getId());
+                                return protestVerification == null
+                                        ? null
+                                        : ProtestVerificationResponse.from(protestVerification);
+                            })
+                    .toList();
         }
+        Protest protest = getProtestById(protestId);
+
+        ProtestVerification protestVerification =
+                protestVerificationRepository.findByProtestId(protest.getId());
+        return List.of(ProtestVerificationResponse.from(protestVerification));
     }
 }

@@ -4,11 +4,13 @@ import jakarta.persistence.*;
 
 import lombok.AccessLevel;
 import lombok.Builder;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 @Entity
 @Table(name = "protest_verifications")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
+@Getter
 public class ProtestVerification {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

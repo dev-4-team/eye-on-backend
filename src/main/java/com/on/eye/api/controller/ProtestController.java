@@ -1,18 +1,20 @@
 package com.on.eye.api.controller;
 
-import com.on.eye.api.domain.Protest;
-import com.on.eye.api.dto.*;
-import com.on.eye.api.service.ProtestService;
+import java.time.LocalDate;
+import java.util.List;
+
 import jakarta.validation.Valid;
-import lombok.RequiredArgsConstructor;
+
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
-import java.time.LocalDate;
-import java.util.List;
+import com.on.eye.api.dto.*;
+import com.on.eye.api.service.ProtestService;
+
+import lombok.RequiredArgsConstructor;
 
 @RestController
 @RequestMapping("/api/protest")
@@ -32,10 +34,7 @@ public class ProtestController {
     public ResponseEntity<List<Long>> createProtest(
             @Valid @RequestBody List<ProtestCreateRequest> protestCreateRequest) {
         return ResponseEntity.status(HttpStatus.CREATED)
-                .body(
-                        protestService.createProtest(protestCreateRequest).stream()
-                                .map(Protest::getId)
-                                .toList());
+                .body(protestService.createProtest(protestCreateRequest));
     }
 
     @GetMapping("/{id}")
@@ -47,10 +46,21 @@ public class ProtestController {
         return ResponseEntity.ok(protestResponse);
     }
 
+    @GetMapping("/verifications")
+    public ResponseEntity<List<ProtestVerificationResponse>> getVerificationsNum(
+            @RequestParam(required = false) Long protestId,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
+                    LocalDate date) {
+        if (date == null) date = LocalDate.now();
+        List<ProtestVerificationResponse> response =
+                protestService.getProtestVerifications(protestId, date);
+        return ResponseEntity.ok(response);
+    }
+
     @GetMapping
     public ResponseEntity<List<ProtestItemResponse>> getProtestsBy(
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
-            LocalDate date) {
+                    LocalDate date) {
         if (date == null) {
             date = LocalDate.now();
         }
