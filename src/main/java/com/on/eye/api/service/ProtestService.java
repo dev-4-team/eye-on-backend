@@ -1,5 +1,15 @@
 package com.on.eye.api.service;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Optional;
+
+import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 import com.on.eye.api.auth.model.entity.User;
 import com.on.eye.api.auth.repository.UserRepository;
 import com.on.eye.api.config.security.SecurityUtils;
@@ -13,16 +23,8 @@ import com.on.eye.api.repository.LocationRepository;
 import com.on.eye.api.repository.ParticipantVerificationRepository;
 import com.on.eye.api.repository.ProtestRepository;
 import com.on.eye.api.repository.ProtestVerificationRepository;
-import lombok.RequiredArgsConstructor;
-import org.springframework.dao.DataIntegrityViolationException;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Optional;
+import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
