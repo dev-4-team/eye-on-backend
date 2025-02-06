@@ -43,7 +43,7 @@ spring:
         default_batch_fetch_size: '100'
     open-in-view: false
     hibernate:
-      ddl-auto: create
+      ddl-auto: update
     defer-datasource-initialization: 'true'
 
 auth:
