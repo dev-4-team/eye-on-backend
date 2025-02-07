@@ -1,3 +1,8 @@
+server:
+  address: ${SERVER_HOST:localhost}  # IP 주소나 호스트네임만 사용
+  port: ${SERVER_PORT:8080}         # 포트는 별도로 설정
+  servlet:
+    context-path: /api             # 컨텍스트 패스는 별도로 설정
 spring:
   config:
     import: optional:file:.env[.properties]
@@ -12,7 +17,7 @@ spring:
             client-id: ${KAKAO_CLIENT_ID}
             client-authentication-method: client_secret_post
             authorization-grant-type: authorization_code
-            redirect-uri: "http://localhost:8080/login/oauth2/code/kakao"
+            redirect-uri: "${BASE_URL}/api/login/oauth2/code/kakao"
             scope:
               - profile_nickname
               - profile_image
@@ -53,7 +58,7 @@ auth:
     refresh-expiration: 604800000 # 1 week
 app:
   oauth2:
-    redirectUri: ${OAUTH2_REDIRECT_URI}
+    redirectUri: "${FRONT_BASE_URL}/oauth2/callback"
 
 logging:
   level:
