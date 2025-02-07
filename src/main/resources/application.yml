@@ -1,6 +1,4 @@
 server:
-  address: ${SERVER_HOST:localhost}  # IP 주소나 호스트네임만 사용
-  port: ${SERVER_PORT:8080}         # 포트는 별도로 설정
   servlet:
     context-path: /api             # 컨텍스트 패스는 별도로 설정
 spring:
