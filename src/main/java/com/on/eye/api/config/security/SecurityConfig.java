@@ -54,7 +54,7 @@ public class SecurityConfig {
                                         SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(
                         request -> {
-                            request.requestMatchers("/api/protest/{id}/participate/verify")
+                            request.requestMatchers("/protest/{id}/participate/verify")
                                     .authenticated();
                             request.requestMatchers(ALLOW_URLS).permitAll();
                             request.anyRequest().permitAll();

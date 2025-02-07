@@ -17,7 +17,7 @@ import com.on.eye.api.service.ProtestService;
 import lombok.RequiredArgsConstructor;
 
 @RestController
-@RequestMapping("/api/protest")
+@RequestMapping("/protest")
 @RequiredArgsConstructor
 @Validated
 public class ProtestController {
