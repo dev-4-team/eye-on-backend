@@ -1,17 +1,16 @@
 package com.on.eye.api.domain;
 
-import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
-
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
-
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(name = "protests")
@@ -47,7 +46,7 @@ public class Protest {
 
     @Column(nullable = false)
     @Min(1)
-    @Max(500)
+    @Max(5000000)
     private Integer declaredParticipants;
 
     @Column(nullable = false)
