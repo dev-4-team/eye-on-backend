@@ -1,11 +1,8 @@
 package com.on.eye.api.auth.model.entity;
 
-import jakarta.persistence.Column;
+import com.on.eye.api.common.model.vo.ImageVo;
 import jakarta.persistence.Embeddable;
 import jakarta.persistence.Embedded;
-
-import com.on.eye.api.common.model.vo.ImageVo;
-
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
@@ -15,12 +12,12 @@ import lombok.NoArgsConstructor;
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Profile {
-    @Column(nullable = false, unique = true)
     private String email;
 
     private String nickname;
 
-    @Embedded private ImageVo profileImageUrl;
+    @Embedded
+    private ImageVo profileImageUrl;
 
     public void withdraw() {
         this.nickname = "탈퇴한 유저";
