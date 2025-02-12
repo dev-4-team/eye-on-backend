@@ -46,7 +46,7 @@ spring:
         default_batch_fetch_size: '100'
     open-in-view: false
     hibernate:
-      ddl-auto: update
+      ddl-auto: create
     defer-datasource-initialization: 'true'
 
 auth:
@@ -57,6 +57,10 @@ auth:
 app:
   oauth2:
     redirectUri: "${FRONT_BASE_URL}/oauth2/callback"
+
+hash:
+  secret-key: ${HASH_SECRET_KEY}
+
 
 logging:
   level:
