@@ -59,6 +59,7 @@ app:
     redirectUri: "${FRONT_BASE_URL}/oauth2/callback"
 
 logging:
+  config: classpath:log4j2-${spring.profiles.active}.xml
   level:
     web: DEBUG
     com.zaxxer.hikari.HikariConfig: DEBUG
