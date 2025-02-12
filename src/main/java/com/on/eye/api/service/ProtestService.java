@@ -10,8 +10,8 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.on.eye.api.auth.model.entity.User;
 import com.on.eye.api.auth.repository.UserRepository;
+import com.on.eye.api.config.security.AnonymousIdGenerator;
 import com.on.eye.api.config.security.SecurityUtils;
 import com.on.eye.api.domain.*;
 import com.on.eye.api.dto.*;
@@ -34,6 +34,7 @@ public class ProtestService {
     private final UserRepository userRepository;
     private final ParticipantVerificationRepository participantVerificationRepository;
     private final ProtestVerificationRepository protestVerificationRepository;
+    private final AnonymousIdGenerator anonymousIdGenerator;
 
     public List<Long> createProtest(List<ProtestCreateRequest> protestCreateRequests) {
         // 생성 시간 기준으로 상태 자동 설정
@@ -183,10 +184,14 @@ public class ProtestService {
 
         if (!isWithInRadius) throw OutOfValidProtestRangeException.EXCEPTION;
 
-        User userRef = userRepository.getReferenceById(userId);
         try {
+            String anonymousUserId =
+                    anonymousIdGenerator.generateAnonymousUserId(userId, protestId);
             ParticipantsVerification verification =
-                    ParticipantsVerification.builder().user(userRef).protest(protest).build();
+                    ParticipantsVerification.builder()
+                            .anonymousUserId(anonymousUserId)
+                            .protest(protest)
+                            .build();
             participantVerificationRepository.save(verification);
             updateProtestVerification(protest);
         } catch (DataIntegrityViolationException e) {
