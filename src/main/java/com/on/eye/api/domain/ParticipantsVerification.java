@@ -4,8 +4,6 @@ import java.time.LocalDateTime;
 
 import jakarta.persistence.*;
 
-import com.on.eye.api.auth.model.entity.User;
-
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
@@ -14,7 +12,7 @@ import lombok.NoArgsConstructor;
 @Entity
 @Table(
         name = "participants_verifications",
-        uniqueConstraints = {@UniqueConstraint(columnNames = {"protest_id", "user_id"})})
+        uniqueConstraints = {@UniqueConstraint(columnNames = {"protest_id", "anonymous_user_Id"})})
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class ParticipantsVerification {
@@ -23,19 +21,18 @@ public class ParticipantsVerification {
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "protest_id", nullable = false)
+    @JoinColumn(name = "protest_id", nullable = false, updatable = false)
     private Protest protest;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id", nullable = false)
-    private User user;
+    @Column(name = "anonymous_user_Id", nullable = false, updatable = false)
+    private String anonymousUserId;
 
     @Column(nullable = false, updatable = false)
     private final LocalDateTime verifiedAt = LocalDateTime.now();
 
     @Builder
-    public ParticipantsVerification(Protest protest, User user) {
+    public ParticipantsVerification(Protest protest, String anonymousUserId) {
         this.protest = protest;
-        this.user = user;
+        this.anonymousUserId = anonymousUserId;
     }
 }
