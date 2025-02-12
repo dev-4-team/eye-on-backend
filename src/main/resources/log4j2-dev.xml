@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Configuration status="INFO">
     <Properties>
-        <Property name="LOG_PATTERN">%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n%throwable</Property>
+        <Property name="LOG_PATTERN">%d{HH:mm:ss.SSS} [%thread] %-5level %c{1.} - %msg%n%throwable</Property>
         <Property name="FILE_PATH">./logs</Property>
     </Properties>
 
@@ -60,8 +60,8 @@
 
         <!-- Access Log: API 호출/응답 로그 -->
         <RollingFile name="AccessAppender"
-                     fileName="{FILE_PATH}/access/access.log"
-                     filePattern="{FILE_PATH}/access/access.log">
+                     fileName="${FILE_PATH}/access/access.log"
+                     filePattern="${FILE_PATH}/access/access.log">
             <PatternLayout pattern="${LOG_PATTERN}" />
             <Policies>
                 <SizeBasedTriggeringPolicy size="10MB" />
@@ -85,6 +85,7 @@
 
         <Logger name="com.on.eye.api.config.response" level="INFO" additivity="false">
             <AppenderRef ref="AccessAppender"/>
+            <AppenderRef ref="ConsoleAppender"/>
         </Logger>
 
         <Root level="INFO">
