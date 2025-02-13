@@ -40,7 +40,7 @@ dependencies {
 
     // PostgreSQL 및 DB 관련
     implementation 'org.postgresql:postgresql'
-    implementation 'org.flywaydb:flyway-core'
+    implementation 'org.flywaydb:flyway-database-postgresql:11.3.1'
 
     // Dev Tools
     developmentOnly 'org.springframework.boot:spring-boot-devtools'

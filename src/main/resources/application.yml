@@ -47,7 +47,7 @@ spring:
     open-in-view: false
     hibernate:
       ddl-auto: create
-    defer-datasource-initialization: 'true'
+    defer-datasource-initialization: 'false'
   flyway:
     enabled: true
     baseline-on-migrate: true
