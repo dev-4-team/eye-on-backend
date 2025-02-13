@@ -31,11 +31,10 @@ public class JwtTokenProvider {
         this.jwtProperties = jwtProperties;
         secretKey =
                 Keys.hmacShaKeyFor(jwtProperties.getSecretKey().getBytes(StandardCharsets.UTF_8));
-        //        secretKey = Keys.hmacShaKeyFor(Jwts.SIG.HS256.key().build().getEncoded());
     }
 
     private Jws<Claims> getJws(String token) {
-        Jws<Claims> claimsJws = null;
+        Jws<Claims> claimsJws;
         try {
             claimsJws = Jwts.parser().verifyWith(secretKey).build().parseSignedClaims(token);
         } catch (ExpiredJwtException e) {
