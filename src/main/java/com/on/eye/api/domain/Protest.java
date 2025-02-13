@@ -1,16 +1,17 @@
 package com.on.eye.api.domain;
 
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
+
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
+
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-
-import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
 
 @Entity
 @Table(name = "protests")
@@ -35,14 +36,13 @@ public class Protest {
     @Column(nullable = false)
     private LocalDateTime endDateTime;
 
-    @Column(nullable = false)
-    private String location; // 집회 장소(행진로)
-
     @OneToMany(mappedBy = "protest", cascade = CascadeType.ALL, orphanRemoval = true)
     @OrderBy("sequence ASC")
     private List<ProtestLocationMapping> locationMappings = new ArrayList<>();
 
-    private String organizer;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "organizer_id", foreignKey = @ForeignKey(ConstraintMode.NO_CONSTRAINT))
+    private Organizer organizer;
 
     @Column(nullable = false)
     @Min(1)
@@ -62,15 +62,13 @@ public class Protest {
             String description,
             LocalDateTime startDateTime,
             LocalDateTime endDateTime,
-            String location,
-            String organizer,
+            Organizer organizer,
             Integer declaredParticipants,
             Integer radius) {
         this.title = title;
         this.description = description;
         this.startDateTime = startDateTime;
         this.endDateTime = endDateTime;
-        this.location = location;
         this.organizer = organizer;
         this.declaredParticipants = declaredParticipants;
         this.radius = radius;
