@@ -38,8 +38,9 @@ dependencies {
     runtimeOnly 'io.jsonwebtoken:jjwt-impl:0.12.5'
     runtimeOnly 'io.jsonwebtoken:jjwt-jackson:0.12.5'
 
-    // PostgreSQL. PostGIS 및 location 관련 의존성은 추후 추가
+    // PostgreSQL 및 DB 관련
     implementation 'org.postgresql:postgresql'
+    implementation 'org.flywaydb:flyway-core'
 
     // Dev Tools
     developmentOnly 'org.springframework.boot:spring-boot-devtools'
