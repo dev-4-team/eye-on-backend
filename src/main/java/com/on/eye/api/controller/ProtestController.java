@@ -58,13 +58,13 @@ public class ProtestController {
     }
 
     @GetMapping
-    public ResponseEntity<List<ProtestItemResponse>> getProtestsBy(
+    public ResponseEntity<List<ProtestResponse>> getProtestsBy(
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
                     LocalDate date) {
         if (date == null) {
             date = LocalDate.now();
         }
-        List<ProtestItemResponse> protests = protestService.getProtestsBy(date);
+        List<ProtestResponse> protests = protestService.getProtestsBy(date);
         return ResponseEntity.ok(protests);
     }
 

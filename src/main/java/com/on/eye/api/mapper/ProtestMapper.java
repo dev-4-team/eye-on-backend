@@ -18,11 +18,8 @@ public class ProtestMapper {
                             Protest protest =
                                     Protest.builder()
                                             .title(protestCreateDto.title())
-                                            .description(protestCreateDto.description())
-                                            .location(protestCreateDto.location())
                                             .startDateTime(protestCreateDto.startDateTime())
                                             .endDateTime(protestCreateDto.endDateTime())
-                                            .organizer(protestCreateDto.organizer())
                                             .declaredParticipants(
                                                     protestCreateDto.declaredParticipants())
                                             .radius(
