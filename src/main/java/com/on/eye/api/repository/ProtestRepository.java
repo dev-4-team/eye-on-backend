@@ -2,8 +2,11 @@ package com.on.eye.api.repository;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 import com.on.eye.api.domain.Protest;
 import com.on.eye.api.domain.ProtestStatus;
@@ -17,6 +20,11 @@ public interface ProtestRepository extends JpaRepository<Protest, Long> {
 
     List<Protest> findByStartDateTimeAfter(LocalDateTime startDateTime);
 
-    // 특정 장소에서 진행되는 시위 목록 조회
-    List<Protest> findByLocation(String location);
+    @Query("SELECT p FROM Protest p LEFT JOIN FETCH p.organizer WHERE p.id = :protestId")
+    Optional<Protest> findByProtestIdWithOrganizer(@Param("protestId") Long protestId);
+
+    @Query(
+            "SELECT DISTINCT p from Protest p LEFT JOIN FETCH p.organizer WHERE p.startDateTime >= :startDateTime")
+    List<Protest> findByStartDateTimeAfterWithOrganizer(
+            @Param("startDateTime") LocalDateTime startDateTime);
 }
