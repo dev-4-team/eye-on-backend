@@ -15,8 +15,10 @@ public interface LocationRepository extends JpaRepository<Location, Long> {
 
     @Query(
             value =
-                    "SELECT * FROM locations WHERE similarity(name, :searchName) > :threshold "
-                            + "ORDER BY similarity(name, :searchName) DESC LIMIT 1",
+                    "SELECT * FROM locations "
+                            + "WHERE bigm_similarity(name, :searchName) > :threshold "
+                            + "ORDER BY bigm_similarity(name, :searchName) DESC "
+                            + "LIMIT 1",
             nativeQuery = true)
     Optional<Location> findMostSimilarLocation(
             @Param("searchName") String searchName, @Param("threshold") double threshold);
