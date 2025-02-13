@@ -10,15 +10,13 @@ import com.on.eye.api.validator.ValidProtestDateTimeRange;
 @ValidProtestDateTimeRange
 public record ProtestCreateRequest(
         String title,
-        String description,
         @NotNull(message = "Start date and time cannot be null")
                 @Future(message = "Start date and time must be in the future")
                 LocalDateTime startDateTime,
         @NotNull(message = "End date and time cannot be null")
                 @Future(message = "End date and time must be in the future")
                 LocalDateTime endDateTime,
-        @NotEmpty(message = "Location cannot be empty") String location,
         String organizer,
         @NotNull(message = "declaredParticipants cannot be null") @Min(0) @Max(5000000)
                 Integer declaredParticipants,
-        @NotEmpty(message = "locations cannot be empty") List<LocationResponse> locations) {}
+        @NotEmpty(message = "locations cannot be empty") List<LocationDto> locations) {}
