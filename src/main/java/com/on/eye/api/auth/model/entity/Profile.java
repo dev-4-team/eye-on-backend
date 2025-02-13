@@ -1,8 +1,10 @@
 package com.on.eye.api.auth.model.entity;
 
-import com.on.eye.api.common.model.vo.ImageVo;
 import jakarta.persistence.Embeddable;
 import jakarta.persistence.Embedded;
+
+import com.on.eye.api.common.model.vo.ImageVo;
+
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
@@ -16,8 +18,7 @@ public class Profile {
 
     private String nickname;
 
-    @Embedded
-    private ImageVo profileImageUrl;
+    @Embedded private ImageVo profileImageUrl;
 
     public void withdraw() {
         this.nickname = "탈퇴한 유저";
