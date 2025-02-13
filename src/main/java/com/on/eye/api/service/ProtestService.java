@@ -10,7 +10,6 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.on.eye.api.auth.repository.UserRepository;
 import com.on.eye.api.config.security.AnonymousIdGenerator;
 import com.on.eye.api.config.security.SecurityUtils;
 import com.on.eye.api.domain.*;
@@ -31,7 +30,6 @@ import lombok.RequiredArgsConstructor;
 public class ProtestService {
     private final ProtestRepository protestRepository;
     private final LocationRepository locationRepository;
-    private final UserRepository userRepository;
     private final ParticipantVerificationRepository participantVerificationRepository;
     private final ProtestVerificationRepository protestVerificationRepository;
     private final AnonymousIdGenerator anonymousIdGenerator;
@@ -40,7 +38,7 @@ public class ProtestService {
         // 생성 시간 기준으로 상태 자동 설정
         List<ProtestCreateMapping> protestCreateMappings =
                 ProtestMapper.toEntity(protestCreateRequests);
-
+        // TODO: 뉴시스 크롤링 완료 시, oranizer 세팅도 적용되어야 함
         // set locations using locationDto
         setLocationMappings(protestCreateMappings);
         // ProtestLocationMapping도 Casacade 설정으로 함께 저장됨
@@ -59,29 +57,29 @@ public class ProtestService {
 
     @Transactional(readOnly = true)
     public ProtestResponse getProtestDetail(Long id) {
-        Protest protest = getProtestById(id);
+        Protest protest = getProtestById(id, true);
 
-        List<LocationResponse> locations = getLocations(protest);
+        List<LocationDto> locations = getLocations(protest);
 
         return ProtestResponse.from(protest, locations);
     }
 
     @Transactional(readOnly = true)
-    public List<ProtestItemResponse> getProtestsBy(LocalDate date) {
+    public List<ProtestResponse> getProtestsBy(LocalDate date) {
         LocalDateTime startOfDay = date.atStartOfDay();
 
-        return protestRepository.findByStartDateTimeAfter(startOfDay).stream()
+        return protestRepository.findByStartDateTimeAfterWithOrganizer(startOfDay).stream()
                 .map(
                         protest -> {
-                            List<LocationResponse> locations = getLocations(protest);
-                            return ProtestItemResponse.from(protest, locations);
+                            List<LocationDto> locations = getLocations(protest);
+                            return ProtestResponse.from(protest, locations);
                         })
                 .toList();
     }
 
     public Long updateProtest(Long id, ProtestUpdateDto updateDto) {
         // Find the protest by ID
-        Protest protest = getProtestById(id);
+        Protest protest = getProtestById(id, true);
 
         // Reflect non-null updateDto fields into the protest entity
         applyUpdates(protest, updateDto);
@@ -99,15 +97,17 @@ public class ProtestService {
             Optional.ofNullable(updateDto.getDescription()).ifPresent(protest::setDescription);
             Optional.ofNullable(updateDto.getStartDateTime()).ifPresent(protest::setStartDateTime);
             Optional.ofNullable(updateDto.getEndDateTime()).ifPresent(protest::setEndDateTime);
-            Optional.ofNullable(updateDto.getLocation()).ifPresent(protest::setLocation);
             Optional.ofNullable(updateDto.getDeclaredParticipants())
                     .ifPresent(protest::setDeclaredParticipants);
-            Optional.ofNullable(updateDto.getOrganizer()).ifPresent(protest::setOrganizer);
             Optional.ofNullable(updateDto.getStatus()).ifPresent(protest::setStatus);
         }
     }
 
-    private Protest getProtestById(Long id) {
+    private Protest getProtestById(Long id, boolean isWithOrganizer) {
+        if (isWithOrganizer)
+            return protestRepository
+                    .findByProtestIdWithOrganizer(id)
+                    .orElseThrow(() -> ProtestNotFoundException.EXCEPTION);
         return protestRepository.findById(id).orElseThrow(() -> ProtestNotFoundException.EXCEPTION);
     }
 
@@ -116,7 +116,7 @@ public class ProtestService {
         for (ProtestCreateMapping mapping : protestCreateMappings) {
             Protest protest = mapping.getProtest();
             ProtestCreateRequest protestCreateRequest = mapping.getProtestCreateRequest();
-            for (LocationResponse locationDto : protestCreateRequest.locations()) {
+            for (LocationDto locationDto : protestCreateRequest.locations()) {
                 // Retrieve or create location
                 Location location = getOrCreateLocation(locationDto);
 
@@ -126,14 +126,15 @@ public class ProtestService {
         }
     }
 
-    private Location getOrCreateLocation(LocationResponse locationDto) {
+    private Location getOrCreateLocation(LocationDto locationDto) {
+        double similarity = 0.5;
         return locationRepository
-                .findByName(locationDto.locationName())
+                .findMostSimilarLocation(locationDto.name(), similarity)
                 .orElseGet(
                         () ->
                                 locationRepository.save(
                                         Location.builder()
-                                                .name(locationDto.locationName())
+                                                .name(locationDto.name())
                                                 .latitude(locationDto.latitude())
                                                 .longitude(locationDto.longitude())
                                                 .build()));
@@ -150,10 +151,10 @@ public class ProtestService {
         protest.getLocationMappings().add(mapping);
     }
 
-    private List<LocationResponse> getLocations(Protest protest) {
+    private List<LocationDto> getLocations(Protest protest) {
         return protest.getLocationMappings().stream()
                 .sorted(Comparator.comparing(ProtestLocationMapping::getSequence))
-                .map(mapping -> LocationResponse.from(mapping.getLocation()))
+                .map(mapping -> LocationDto.from(mapping.getLocation()))
                 .toList();
     }
 
@@ -168,7 +169,7 @@ public class ProtestService {
     @Transactional
     public Boolean participateVerify(Long protestId, ParticipateVerificationRequest request) {
         Long userId = SecurityUtils.getCurrentUserId();
-        Protest protest = getProtestById(protestId);
+        Protest protest = getProtestById(protestId, false);
 
         ProtestLocationDto protestLocationDto = getProtestLocationDto(protest);
 
@@ -220,7 +221,7 @@ public class ProtestService {
                             })
                     .toList();
         }
-        Protest protest = getProtestById(protestId);
+        Protest protest = getProtestById(protestId, false);
 
         ProtestVerification protestVerification =
                 protestVerificationRepository.findByProtestId(protest.getId());
