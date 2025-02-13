@@ -8,8 +8,8 @@ import jakarta.validation.constraints.NotNull;
 
 import com.on.eye.api.domain.Location;
 
-public record LocationResponse(
-        @NotEmpty(message = "locationName cannot be empty") String locationName,
+public record LocationDto(
+        @NotEmpty(message = "location name cannot be empty") String name,
         @NotNull(message = "longitude cannot be null")
                 @Digits(
                         integer = 3,
@@ -25,8 +25,7 @@ public record LocationResponse(
                                 "latitude must have up to 3 integer digits and 14 fractional digits")
                 BigDecimal longitude) {
 
-    public static LocationResponse from(Location location) {
-        return new LocationResponse(
-                location.getName(), location.getLatitude(), location.getLongitude());
+    public static LocationDto from(Location location) {
+        return new LocationDto(location.getName(), location.getLatitude(), location.getLongitude());
     }
 }

@@ -1,5 +1,7 @@
 .env
 
+qodana.yaml
+
 HELP.md
 .gradle
 build/

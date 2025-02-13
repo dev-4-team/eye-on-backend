@@ -15,6 +15,16 @@ public interface LocationRepository extends JpaRepository<Location, Long> {
 
     @Query(
             value =
+                    "SELECT * FROM locations "
+                            + "WHERE bigm_similarity(name, :searchName) > :threshold "
+                            + "ORDER BY bigm_similarity(name, :searchName) DESC "
+                            + "LIMIT 1",
+            nativeQuery = true)
+    Optional<Location> findMostSimilarLocation(
+            @Param("searchName") String searchName, @Param("threshold") double threshold);
+
+    @Query(
+            value =
                     """
                                  SELECT earth_distance(
                                      ll_to_earth(:userLat, :userLng),
@@ -31,19 +41,19 @@ public interface LocationRepository extends JpaRepository<Location, Long> {
 
     @Query(
             """
-                    select new com.on.eye.api.dto.ProtestLocationDto(
-                        p.id,
-                        p.radius,
-                        l.id,
-                        l.latitude,
-                        l.longitude
-                    )
-                    from Protest p
-                    join p.locationMappings lm
-                    join lm.location l
-                    where p.id = :protestId
-                    order by lm.sequence
-                    limit 1
-            """)
+                            select new com.on.eye.api.dto.ProtestLocationDto(
+                                p.id,
+                                p.radius,
+                                l.id,
+                                l.latitude,
+                                l.longitude
+                            )
+                            from Protest p
+                            join p.locationMappings lm
+                            join lm.location l
+                            where p.id = :protestId
+                            order by lm.sequence
+                            limit 1
+                    """)
     Optional<ProtestLocationDto> findFirstLocationByProtestId(@Param("protestId") Long protestId);
 }
