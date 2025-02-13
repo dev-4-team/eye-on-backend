@@ -50,6 +50,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
         ErrorResponse errorResponse =
                 new ErrorResponse(statusCode.value(), statusCode.toString(), ex.getMessage(), url);
 
+        log.error("내부 오류 발생 - Status: {}, URL: {}, 메시지: {}", statusCode.value(), url, ex.getMessage());
         return super.handleExceptionInternal(ex, errorResponse, headers, statusCode, request);
     }
 
@@ -81,6 +82,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
         ErrorResponse errorResponse =
                 new ErrorResponse(status.value(), status.toString(), errorsToJsonString, url);
 
+        log.warn("요청 데이터의 검증 실패 - URL: {}, 오류: {}", url, errorsToJsonString);
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
     }
 
@@ -124,6 +126,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
         ErrorResponse errorResponse =
                 new ErrorResponse(errorReason, request.getRequestURL().toString());
 
+        log.warn("제약 조건 위반 - URL: {}, 오류: {}", request.getRequestURL(), bindingErrors);
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
     }
 }
