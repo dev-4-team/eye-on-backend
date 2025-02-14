@@ -33,14 +33,25 @@ public class ProtestMapper {
     }
 
     private static Integer calRadius(int declaredParticipants) {
-        int minRadius = 200;
-        int maxRadius = 500;
-        int minParticipants = 100;
+        // 최소/최대 제한 설정
+        if (declaredParticipants < 10) return 10;
+        if (declaredParticipants > 500000) return 500;
 
-        Double logParticipants = Math.log10(declaredParticipants) - Math.log10(minParticipants);
-        Double logRange = Math.log10(maxRadius) - Math.log10(minParticipants);
-        double normalizedLogParticipants = logParticipants / logRange;
-        double radius = minRadius + (maxRadius - minRadius) * normalizedLogParticipants;
+        // 로그 스케일 변환을 위한 기본값 설정
+        final double MIN_PARTICIPANTS = Math.log(10);
+        final double MAX_PARTICIPANTS = Math.log(500000);
+        final double MIN_RADIUS = 10;
+        final double MAX_RADIUS = 500;
+
+        // 로그 스케일 변환 후 선형 매핑
+        double logParticipants = Math.log(declaredParticipants);
+        double radius =
+                MIN_RADIUS
+                        + (logParticipants - MIN_PARTICIPANTS)
+                                * (MAX_RADIUS - MIN_RADIUS)
+                                / (MAX_PARTICIPANTS - MIN_PARTICIPANTS);
+
+        // 정수로 반올림
         return (int) Math.round(radius);
     }
 }
