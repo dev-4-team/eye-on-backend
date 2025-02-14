@@ -46,7 +46,7 @@ spring:
         default_batch_fetch_size: '100'
     open-in-view: false
     hibernate:
-      ddl-auto: create
+      ddl-auto: validate
     defer-datasource-initialization: 'false'
   flyway:
     enabled: true
