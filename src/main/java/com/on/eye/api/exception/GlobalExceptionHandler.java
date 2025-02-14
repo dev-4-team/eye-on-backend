@@ -50,7 +50,11 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
         ErrorResponse errorResponse =
                 new ErrorResponse(statusCode.value(), statusCode.toString(), ex.getMessage(), url);
 
-        log.error("내부 오류 발생 - Status: {}, URL: {}, 메시지: {}", statusCode.value(), url, ex.getMessage());
+        log.error(
+                "내부 오류 발생 - Status: {}, URL: {}, 메시지: {}",
+                statusCode.value(),
+                url,
+                ex.getMessage());
         return super.handleExceptionInternal(ex, errorResponse, headers, statusCode, request);
     }
 

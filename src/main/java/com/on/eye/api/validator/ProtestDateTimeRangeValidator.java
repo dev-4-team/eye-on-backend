@@ -6,6 +6,7 @@ import jakarta.validation.ConstraintValidator;
 import jakarta.validation.ConstraintValidatorContext;
 
 import com.on.eye.api.dto.ProtestCreateRequest;
+
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
@@ -21,7 +22,10 @@ public class ProtestDateTimeRangeValidator
             return false; // Invalid if any of the fields are null
         }
         if (isInvalidTimePriority(createDto)) {
-            log.warn("시위 시간 순서 오류 - 시작:{}, 종료: {}", createDto.startDateTime(), createDto.endDateTime());
+            log.warn(
+                    "시위 시간 순서 오류 - 시작:{}, 종료: {}",
+                    createDto.startDateTime(),
+                    createDto.endDateTime());
             context.buildConstraintViolationWithTemplate(
                             context.getDefaultConstraintMessageTemplate())
                     .addPropertyNode("startDateTime")
