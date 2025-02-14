@@ -6,7 +6,6 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -25,6 +24,7 @@ import com.on.eye.api.repository.ProtestRepository;
 import com.on.eye.api.repository.ProtestVerificationRepository;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 @Service
 @RequiredArgsConstructor
@@ -84,14 +84,18 @@ public class ProtestService {
         log.info("날짜 별 시위 조회 요청 - 날짜: {}", date);
 
         LocalDateTime startOfDay = date.atStartOfDay();
+        LocalDateTime endOfDay = date.plusDays(1).atStartOfDay();
 
-        List<ProtestResponse> response = protestRepository.findByStartDateTimeAfterWithOrganizer(startOfDay).stream()
-                .map(
-                        protest -> {
-                            List<LocationDto> locations = getLocations(protest);
-                            return ProtestResponse.from(protest, locations);
-                        })
-                .toList();
+        List<ProtestResponse> response =
+                protestRepository
+                        .findByStartDateTimeAfterWithOrganizer(startOfDay, endOfDay)
+                        .stream()
+                        .map(
+                                protest -> {
+                                    List<LocationDto> locations = getLocations(protest);
+                                    return ProtestResponse.from(protest, locations);
+                                })
+                        .toList();
 
         log.info("날짜 별 시위 조회 완료 - 날짜: {}, 조회된 시위: {}건", date, response.size());
         return response;

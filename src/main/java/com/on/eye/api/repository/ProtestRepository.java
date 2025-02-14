@@ -24,7 +24,7 @@ public interface ProtestRepository extends JpaRepository<Protest, Long> {
     Optional<Protest> findByProtestIdWithOrganizer(@Param("protestId") Long protestId);
 
     @Query(
-            "SELECT DISTINCT p from Protest p LEFT JOIN FETCH p.organizer WHERE p.startDateTime >= :startDateTime")
+            "SELECT DISTINCT p from Protest p LEFT JOIN FETCH p.organizer WHERE p.startDateTime >= :startDateTime and p.endDateTime < :endDateTime")
     List<Protest> findByStartDateTimeAfterWithOrganizer(
-            @Param("startDateTime") LocalDateTime startDateTime);
+            @Param("startDateTime") LocalDateTime startDateTime, LocalDateTime endDateTime);
 }
