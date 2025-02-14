@@ -1,9 +1,10 @@
 package com.on.eye.api.config.security;
 
-import static com.on.eye.api.constants.AuthConstants.ALLOW_URLS;
-
-import java.util.Arrays;
-
+import com.on.eye.api.auth.service.CustomOAuth2UserService;
+import com.on.eye.api.auth.service.OAuth2AuthenticationFailureHandler;
+import com.on.eye.api.auth.service.OAuth2AuthenticationSuccessHandler;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.access.hierarchicalroles.RoleHierarchy;
@@ -20,12 +21,9 @@ import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
-import com.on.eye.api.auth.service.CustomOAuth2UserService;
-import com.on.eye.api.auth.service.OAuth2AuthenticationFailureHandler;
-import com.on.eye.api.auth.service.OAuth2AuthenticationSuccessHandler;
+import java.util.Arrays;
 
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
+import static com.on.eye.api.constants.AuthConstants.ALLOW_URLS;
 
 @Configuration
 @EnableWebSecurity
@@ -97,7 +95,7 @@ public class SecurityConfig {
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
         configuration.setAllowedOrigins(
-                Arrays.asList("http://localhost:3000", "https://www.eye-on.kr"));
+                Arrays.asList("http://localhost:3000", "https://www.eye-on.kr", "https://eye-on.kr"));
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         configuration.setAllowedHeaders(
                 Arrays.asList(
