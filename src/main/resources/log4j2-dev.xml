@@ -1,0 +1,117 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration status="INFO">
+    <Properties>
+        <Property name="LOG_PATTERN">%d{HH:mm:ss.SSS} [%thread] %-5level %c{1.} - %msg%n%throwable</Property>
+        <Property name="FILE_PATH">./logs</Property>
+    </Properties>
+
+    <Appenders>
+        <!-- Console -->
+        <Console name="ConsoleAppender" target="SYSTEM_OUT">
+            <PatternLayout pattern="${LOG_PATTERN}" charset="UTF-8"/>
+        </Console>
+
+        <!-- Application Log: INFO 레벨 이상 -->
+        <RollingFile name="ApplicationAppender"
+                     fileName="${FILE_PATH}/application.log"
+                     filePattern="${FILE_PATH}/application.log">
+            <PatternLayout pattern="${LOG_PATTERN}" charset="UTF-8" />
+            <Policies>
+                <SizeBasedTriggeringPolicy size="10MB"/>
+            </Policies>
+            <DefaultRolloverStrategy max="1"/>
+            <ThresholdFilter level="INFO" onMatch="ACCEPT" onMismatch="DENY" />
+        </RollingFile>
+
+        <!-- Debug Log: DEBUG 레벨만 -->
+        <RollingFile name="DebugAppender"
+                     fileName="${FILE_PATH}/debug.log"
+                     filePattern="${FILE_PATH}/debug.log">
+            <PatternLayout pattern="${LOG_PATTERN}" charset="UTF-8" />
+            <Policies>
+                <SizeBasedTriggeringPolicy size="10MB"/>
+            </Policies>
+            <DefaultRolloverStrategy max="1"/>
+            <LevelMatchFilter level="DEBUG" onMatch="ACCEPT" onMismatch="DENY" />
+        </RollingFile>
+
+        <!-- Error Log: WARN 레벨 이상 -->
+        <RollingFile name="ErrorAppender"
+                     fileName="${FILE_PATH}/error.log"
+                     filePattern="${FILE_PATH}/error.log">
+            <PatternLayout pattern="${LOG_PATTERN}" charset="UTF-8" />
+            <Policies>
+                <SizeBasedTriggeringPolicy size="10MB"/>
+            </Policies>
+            <DefaultRolloverStrategy max="1"/>
+            <ThresholdFilter level="WARN" onMatch="ACCEPT" onMismatch="DENY" />
+        </RollingFile>
+
+        <!-- Auth Log: 인증 과정에서 발생하는 로그 -->
+        <RollingFile name="AuthAppender"
+                     fileName="${FILE_PATH}/auth/auth.log"
+                     filePattern="${FILE_PATH}/auth/auth.log">
+            <PatternLayout pattern="${LOG_PATTERN}" charset="UTF-8" />
+            <Policies>
+                <SizeBasedTriggeringPolicy size="10MB"/>
+            </Policies>
+            <DefaultRolloverStrategy max="1"/>
+        </RollingFile>
+
+        <!-- Access Log: API 호출/응답 로그 -->
+        <RollingFile name="AccessAppender"
+                     fileName="${FILE_PATH}/access/access.log"
+                     filePattern="${FILE_PATH}/access/access.log">
+            <PatternLayout pattern="${LOG_PATTERN}" charset="UTF-8" />
+            <Policies>
+                <SizeBasedTriggeringPolicy size="10MB" />
+            </Policies>
+            <DefaultRolloverStrategy max="1"/>
+        </RollingFile>
+
+        <!-- 각 Appender를 Async로 래핑 -->
+        <Async name="AsyncApplicationAppender" bufferSize="8192">
+            <AppenderRef ref="ApplicationAppender"/>
+        </Async>
+
+        <Async name="AsyncDebugAppender" bufferSize="8192">
+            <AppenderRef ref="DebugAppender"/>
+        </Async>
+
+        <Async name="AsyncErrorAppender" bufferSize="8192">
+            <AppenderRef ref="ErrorAppender"/>
+        </Async>
+
+        <Async name="AsyncAuthAppender" bufferSize="8192">
+            <AppenderRef ref="AuthAppender"/>
+        </Async>
+
+        <Async name="AsyncAccessAppender" bufferSize="8192">
+            <AppenderRef ref="AccessAppender"/>
+        </Async>
+    </Appenders>
+
+    <Loggers>
+
+        <Logger name="com.on.eye.api" level="DEBUG" additivity="false">
+            <AppenderRef ref="AsyncDebugAppender"/>
+            <AppenderRef ref="ConsoleAppender"/>
+        </Logger>
+
+        <Logger name="com.on.eye.api.auth" level="DEBUG" additivity="false">
+            <AppenderRef ref="AsyncAuthAppender"/>
+            <AppenderRef ref="ConsoleAppender"/>
+        </Logger>
+
+        <Logger name="com.on.eye.api.config.response" level="INFO" additivity="false">
+            <AppenderRef ref="AsyncAccessAppender"/>
+            <AppenderRef ref="ConsoleAppender"/>
+        </Logger>
+
+        <Root level="INFO">
+            <AppenderRef ref="AsyncApplicationAppender" />
+            <AppenderRef ref="AsyncErrorAppender" />
+            <AppenderRef ref="ConsoleAppender"/>
+        </Root>
+    </Loggers>
+</Configuration>

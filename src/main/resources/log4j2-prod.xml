@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration status="INFO">
+    <Properties>
+        <Property name="LOG_PATTERN">%d{HH:mm:ss.SSS} [%thread] %-5level %c{1.} - %msg%n%throwable</Property>
+        <Property name="FILE_PATH">./logs</Property>
+    </Properties>
+
+    <Appenders>
+
+        <!-- Application Log: INFO 레벨 이상 -->
+        <RollingFile name="ApplicationAppender"
+                     fileName="${FILE_PATH}/current/application.log"
+                     filePattern="${FILE_PATH}/archive/application/application-%d{yyyy-MM-dd}-%i.log">
+            <PatternLayout pattern="${LOG_PATTERN}" charset="UTF-8" />
+            <Policies>
+                <SizeBasedTriggeringPolicy size="20MB"/>
+                <TimeBasedTriggeringPolicy interval="1" modulate="true" />
+            </Policies>
+            <DefaultRolloverStrategy max="30">
+                <Delete basePath="${FILE_PATH}/archive/application" maxDepth="1">
+                    <IfLastModified age="30d"/>
+                </Delete>
+            </DefaultRolloverStrategy>
+            <ThresholdFilter level="INFO" onMatch="ACCEPT" onMismatch="DENY" />
+        </RollingFile>
+
+        <!-- Error Log: WARN 레벨 이상 -->
+        <RollingFile name="ErrorAppender"
+                     fileName="${FILE_PATH}/current/error.log"
+                     filePattern="${FILE_PATH}/archive/error/error-%d{yyyy-MM-dd}-%i.log">
+            <PatternLayout pattern="${LOG_PATTERN}" charset="UTF-8" />
+            <Policies>
+                <SizeBasedTriggeringPolicy size="20MB"/>
+                <TimeBasedTriggeringPolicy interval="1" modulate="true"/>
+            </Policies>
+            <DefaultRolloverStrategy max="30">
+                <Delete basePath="${FILE_PATH}/archive/error" maxDepth="1">
+                    <IfLastModified age="30d"/>
+                </Delete>
+            </DefaultRolloverStrategy>
+            <ThresholdFilter level="WARN" onMatch="ACCEPT" onMismatch="DENY" />
+        </RollingFile>
+
+        <!-- Auth Log: 인증 과정에서 발생하는 로그만 -->
+        <RollingFile name="AuthAppender"
+                     fileName="${FILE_PATH}/auth/auth.log"
+                     filePattern="${FILE_PATH}/auth/auth-%d{yyyy-MM-dd}-%i.log">
+            <PatternLayout pattern="${LOG_PATTERN}" charset="UTF-8" />
+            <Policies>
+                <SizeBasedTriggeringPolicy size="20MB"/>
+                <TimeBasedTriggeringPolicy interval="1" modulate="true"/>
+            </Policies>
+            <DefaultRolloverStrategy max="30">
+                <Delete basePath="${FILE_PATH}/auth" maxDepth="1">
+                    <IfLastModified age="30d"/>
+                </Delete>
+            </DefaultRolloverStrategy>
+        </RollingFile>
+
+        <!-- 각 Appender를 Async로 래핑 -->
+        <Async name="AsyncApplicationAppender" bufferSize="8192">
+            <AppenderRef ref="ApplicationAppender"/>
+        </Async>
+
+        <Async name="AsyncErrorAppender" bufferSize="8192">
+            <AppenderRef ref="ErrorAppender"/>
+        </Async>
+
+        <Async name="AsyncAuthAppender" bufferSize="8192">
+            <AppenderRef ref="AuthAppender"/>
+        </Async>
+    </Appenders>
+
+    <Loggers>
+
+        <Logger name="com.on.eye.api.auth" level="INFO" additivity="false">
+            <AppenderRef ref="AsyncAuthAppender"/>
+        </Logger>
+
+        <Root level="INFO">
+            <AppenderRef ref="AsyncApplicationAppender" />
+            <AppenderRef ref="AsyncErrorAppender" />
+        </Root>
+    </Loggers>
+</Configuration>

@@ -1,5 +1,7 @@
 .env
 
+qodana.yaml
+
 HELP.md
 .gradle
 build/
@@ -37,3 +39,7 @@ out/
 
 ### VS Code ###
 .vscode/
+
+### Logs ###
+/logs/
+*.log

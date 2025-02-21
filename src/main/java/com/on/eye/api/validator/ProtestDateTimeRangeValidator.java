@@ -1,28 +1,53 @@
 package com.on.eye.api.validator;
 
-import com.on.eye.api.dto.ProtestCreateDto;
-import jakarta.validation.ConstraintValidator;
 import java.time.Duration;
 
+import jakarta.validation.ConstraintValidator;
 import jakarta.validation.ConstraintValidatorContext;
 
-public class ProtestDateTimeRangeValidator implements ConstraintValidator<ValidProtestDateTimeRange, ProtestCreateDto> {
+import com.on.eye.api.dto.ProtestCreateRequest;
+
+import lombok.extern.slf4j.Slf4j;
+
+@Slf4j
+public class ProtestDateTimeRangeValidator
+        implements ConstraintValidator<ValidProtestDateTimeRange, ProtestCreateRequest> {
     @Override
-    public boolean isValid(ProtestCreateDto createDto, ConstraintValidatorContext context) {
-            
-        if (createDto == null || createDto.getStartDateTime() == null || createDto.getEndDateTime() == null) {
+    public boolean isValid(ProtestCreateRequest createDto, ConstraintValidatorContext context) {
+
+        if (createDto == null
+                || createDto.startDateTime() == null
+                || createDto.endDateTime() == null) {
+            log.warn("시위 생성 데이터 누락");
             return false; // Invalid if any of the fields are null
         }
-        if (isInvalidTimePriority(createDto)) return false;
+        if (isInvalidTimePriority(createDto)) {
+            log.warn(
+                    "시위 시간 순서 오류 - 시작:{}, 종료: {}",
+                    createDto.startDateTime(),
+                    createDto.endDateTime());
+            context.buildConstraintViolationWithTemplate(
+                            context.getDefaultConstraintMessageTemplate())
+                    .addPropertyNode("startDateTime")
+                    .addPropertyNode("endDateTime")
+                    .addConstraintViolation();
+            return false;
+        }
         return !isInValidTimeDiff(createDto);
     }
 
-    private boolean isInValidTimeDiff(ProtestCreateDto createDto) {
-        long hoursDifference = Duration.between(createDto.getStartDateTime(), createDto.getEndDateTime()).toHours();
-        return hoursDifference < 1 || hoursDifference > 24;
+    private boolean isInValidTimeDiff(ProtestCreateRequest createDto) {
+        long hoursDifference =
+                Duration.between(createDto.startDateTime(), createDto.endDateTime()).toHours();
+
+        if (hoursDifference < 1 || hoursDifference > 24) {
+            log.warn("시위 시간 범위 오류 - {} 시간", hoursDifference);
+            return true;
+        }
+        return false;
     }
 
-    private boolean isInvalidTimePriority(ProtestCreateDto createDto) {
-        return createDto.getEndDateTime().isBefore(createDto.getStartDateTime());
+    private boolean isInvalidTimePriority(ProtestCreateRequest createDto) {
+        return createDto.endDateTime().isBefore(createDto.startDateTime());
     }
 }

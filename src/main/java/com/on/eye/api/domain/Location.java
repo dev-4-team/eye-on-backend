@@ -1,20 +1,18 @@
 package com.on.eye.api.domain;
 
+import java.math.BigDecimal;
+
 import jakarta.persistence.*;
+
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
-import java.math.BigDecimal;
-
 @Entity
 @Table(
         name = "locations",
-        indexes = {
-                @Index(name = "location_name", columnList = "name", unique = true)
-        }
-)
+        indexes = {@Index(name = "location_name", columnList = "name", unique = true)})
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Location {
