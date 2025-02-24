@@ -10,6 +10,9 @@
 
 ### 서비스 화면
 
+<img src="https://github.com/user-attachments/assets/25ff8eea-c82e-48d1-a98b-191e0002449f" width="300"/>
+<img src="https://github.com/user-attachments/assets/f360dc6d-eabb-4287-b5b2-25c28162e0b3" width="300"/>
+
 ### 담당 역할
 
 백엔드 로직 개발(Java, Springboot, PostgreSQL)
