@@ -1,26 +1,8 @@
 package com.on.eye.api;
 
-import com.on.eye.api.domain.Location;
-import com.on.eye.api.domain.ParticipantsVerification;
-import com.on.eye.api.dto.LocationDto;
-import com.on.eye.api.dto.ParticipateVerificationRequest;
-import com.on.eye.api.dto.ProtestCreateRequest;
-import com.on.eye.api.exception.DuplicateVerificationException;
-import com.on.eye.api.exception.OutOfValidProtestRangeException;
-import com.on.eye.api.repository.LocationRepository;
-import com.on.eye.api.repository.ParticipantVerificationRepository;
-import com.on.eye.api.repository.ProtestRepository;
-import com.on.eye.api.repository.ProtestVerificationRepository;
-import com.on.eye.api.service.ProtestService;
-import org.junit.jupiter.api.*;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.test.context.ActiveProfiles;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.junit.jupiter.api.Assertions.*;
 
 import java.math.BigDecimal;
 import java.time.Duration;
@@ -33,9 +15,28 @@ import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.junit.jupiter.api.Assertions.*;
+import org.junit.jupiter.api.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.test.context.ActiveProfiles;
+
+import com.on.eye.api.domain.Location;
+import com.on.eye.api.domain.ParticipantsVerification;
+import com.on.eye.api.dto.LocationDto;
+import com.on.eye.api.dto.ParticipateVerificationRequest;
+import com.on.eye.api.dto.ProtestCreateRequest;
+import com.on.eye.api.exception.DuplicateVerificationException;
+import com.on.eye.api.exception.OutOfValidProtestRangeException;
+import com.on.eye.api.repository.LocationRepository;
+import com.on.eye.api.repository.ParticipantVerificationRepository;
+import com.on.eye.api.repository.ProtestRepository;
+import com.on.eye.api.repository.ProtestVerificationRepository;
+import com.on.eye.api.service.ProtestService;
 
 @SpringBootTest
 @ActiveProfiles("test")
@@ -45,16 +46,12 @@ class ProtestParticipationVerificationTest {
 
     private static final Logger log =
             LoggerFactory.getLogger(ProtestParticipationVerificationTest.class);
-    @Autowired
-    private ProtestService protestService;
+    @Autowired private ProtestService protestService;
 
-    @Autowired
-    private ProtestRepository protestRepository;
+    @Autowired private ProtestRepository protestRepository;
 
-    @Autowired
-    private LocationRepository locationRepository;
-    @Autowired
-    private ParticipantVerificationRepository participantVerificationRepository;
+    @Autowired private LocationRepository locationRepository;
+    @Autowired private ParticipantVerificationRepository participantVerificationRepository;
 
     private Long testProtestId;
     private Location testLocation;
@@ -72,8 +69,7 @@ class ProtestParticipationVerificationTest {
 
     private List<Duration> responseTimes;
     private List<String> performanceIssues;
-    @Autowired
-    private ProtestVerificationRepository protestVerificationRepository;
+    @Autowired private ProtestVerificationRepository protestVerificationRepository;
 
     @BeforeAll
     void setUp() {
