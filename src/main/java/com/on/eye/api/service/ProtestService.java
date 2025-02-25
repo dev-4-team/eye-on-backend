@@ -1,15 +1,5 @@
 package com.on.eye.api.service;
 
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Optional;
-
-import org.springframework.dao.DataIntegrityViolationException;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
 import com.on.eye.api.config.security.AnonymousIdGenerator;
 import com.on.eye.api.config.security.SecurityUtils;
 import com.on.eye.api.domain.*;
@@ -18,13 +8,18 @@ import com.on.eye.api.exception.DuplicateVerificationException;
 import com.on.eye.api.exception.OutOfValidProtestRangeException;
 import com.on.eye.api.exception.ProtestNotFoundException;
 import com.on.eye.api.mapper.ProtestMapper;
-import com.on.eye.api.repository.LocationRepository;
-import com.on.eye.api.repository.ParticipantVerificationRepository;
-import com.on.eye.api.repository.ProtestRepository;
-import com.on.eye.api.repository.ProtestVerificationRepository;
-
+import com.on.eye.api.repository.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -35,7 +30,9 @@ public class ProtestService {
     private final ParticipantVerificationRepository participantVerificationRepository;
     private final ProtestVerificationRepository protestVerificationRepository;
     private final AnonymousIdGenerator anonymousIdGenerator;
+    private final OrganizerRepository organizerRepository;
 
+    @Transactional
     public List<Long> createProtest(List<ProtestCreateRequest> protestCreateRequests) {
         log.info("시위 {}건 생성 요청", protestCreateRequests.size());
 
@@ -44,25 +41,58 @@ public class ProtestService {
                 ProtestMapper.toEntity(protestCreateRequests);
         log.debug("시위 정보 매핑 {}건 완료", protestCreateMappings.size());
 
-        // TODO: 뉴시스 크롤링 완료 시, oranizer 세팅도 적용되어야 함
         // set locations using locationDto
         setLocationMappings(protestCreateMappings);
         log.debug("시위 장소 정보 매핑 완료");
 
+        checkOrganizer(protestCreateMappings);
+
         // ProtestLocationMapping도 Casacade 설정으로 함께 저장됨
         List<Protest> protests =
-                protestCreateMappings.stream().map(ProtestCreateMapping::getProtest).toList();
-
-        List<ProtestVerification> protestVerifications =
-                protests.stream()
-                        .map(protest -> ProtestVerification.builder().protest(protest).build())
+                protestCreateMappings.stream()
+                        .map(
+                                mapping -> {
+                                    Protest protest = mapping.getProtest();
+                                    ProtestVerification protestVerification =
+                                            new ProtestVerification(protest);
+                                    protest.setProtestVerification(protestVerification);
+                                    return protest;
+                                })
                         .toList();
+
         List<Long> response =
                 protestRepository.saveAll(protests).stream().map(Protest::getId).toList();
-        protestVerificationRepository.saveAll(protestVerifications);
 
         log.info("시위 {}건 생성 완료. 생성된 ID: {}", protests.size(), response);
         return response;
+    }
+
+    private void checkOrganizer(List<ProtestCreateMapping> protestCreateMappings) {
+        double threshold = 0.35;
+        protestCreateMappings.forEach(
+                createMapping ->
+                        organizerRepository
+                                .findBySimilarOrganizer(
+                                        createMapping.getProtestCreateRequest().organizer(),
+                                        threshold)
+                                .ifPresentOrElse(
+                                        organizer ->
+                                                createMapping.getProtest().setOrganizer(organizer),
+                                        () -> {
+                                            Organizer organizer =
+                                                    organizerRepository.save(
+                                                            Organizer.builder()
+                                                                    .name(
+                                                                            createMapping
+                                                                                    .getProtestCreateRequest()
+                                                                                    .organizer())
+                                                                    .title(
+                                                                            createMapping
+                                                                                    .getProtestCreateRequest()
+                                                                                    .title())
+                                                                    .build());
+                                            createMapping.getProtest().setOrganizer(organizer);
+                                        }));
     }
 
     @Transactional(readOnly = true)
@@ -156,7 +186,7 @@ public class ProtestService {
     }
 
     private Location getOrCreateLocation(LocationDto locationDto) {
-        double similarity = 0.5;
+        double similarity = 0.35;
         return locationRepository
                 .findMostSimilarLocation(locationDto.name(), similarity)
                 .orElseGet(
@@ -194,7 +224,7 @@ public class ProtestService {
                 .orElseThrow(() -> ProtestNotFoundException.EXCEPTION);
     }
 
-    // TODO: 성능개선 여지 있음
+    // TODO: 성능개선 여지 있음. Thread 간에는 Transaction 안먹힘
     @Transactional
     public Boolean participateVerify(Long protestId, ParticipateVerificationRequest request) {
         Long userId = SecurityUtils.getCurrentUserId();
@@ -204,9 +234,7 @@ public class ProtestService {
 
         Double distance =
                 locationRepository.calculateDistance(
-                        request.getLatitude(),
-                        request.getLongitude(),
-                        protestLocationDto.locationId());
+                        request.latitude(), request.longitude(), protestLocationDto.locationId());
 
         if (distance == null) throw ProtestNotFoundException.EXCEPTION;
 
