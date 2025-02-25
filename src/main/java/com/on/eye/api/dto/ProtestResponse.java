@@ -66,7 +66,9 @@ public class ProtestResponse {
                         .locations(locations);
         Organizer organizer = protest.getOrganizer();
         if (organizer != null) {
-            builder.organizer(organizer.getName()).description(organizer.getDescription());
+            builder.organizer(organizer.getName())
+                    .description(organizer.getDescription())
+                    .title(organizer.getTitle());
         }
         return builder.build();
     }
