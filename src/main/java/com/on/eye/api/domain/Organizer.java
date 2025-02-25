@@ -2,6 +2,7 @@ package com.on.eye.api.domain;
 
 import jakarta.persistence.*;
 
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -19,6 +20,15 @@ public class Organizer {
     @Column(nullable = false)
     private String name;
 
-    @Column(nullable = false, columnDefinition = "TEXT")
+    @Column(columnDefinition = "TEXT")
     private String description;
+
+    private String title;
+
+    @Builder
+    public Organizer(String name, String description, String title) {
+        this.name = name;
+        this.description = description;
+        this.title = title;
+    }
 }
