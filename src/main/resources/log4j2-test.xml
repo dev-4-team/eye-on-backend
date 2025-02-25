@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration status="WARN">
+    <Properties>
+        <Property name="LOG_PATTERN">%d{HH:mm:ss.SSS} %-5level %c{1.} - %msg%n</Property>
+    </Properties>
+
+    <Appenders>
+        <!-- Console: 테스트 결과 확인을 위한 최소한의 출력 -->
+        <Console name="ConsoleAppender" target="SYSTEM_OUT">
+            <PatternLayout pattern="${LOG_PATTERN}" charset="UTF-8"/>
+            <ThresholdFilter level="INFO" onMatch="ACCEPT" onMismatch="DENY"/>
+        </Console>
+    </Appenders>
+
+    <Loggers>
+        <!-- 테스트 대상 패키지는 INFO 레벨로 설정 -->
+        <Logger name="com.on.eye.api" level="INFO" additivity="false">
+            <AppenderRef ref="ConsoleAppender"/>
+        </Logger>
+
+        <!-- Spring Framework 로그는 ERROR 레벨로 제한 -->
+        <Logger name="org.springframework" level="ERROR" additivity="false">
+            <AppenderRef ref="ConsoleAppender"/>
+        </Logger>
+
+        <!-- Hibernate 로그는 ERROR 레벨로 제한 -->
+        <Logger name="org.hibernate" level="ERROR" additivity="false">
+            <AppenderRef ref="ConsoleAppender"/>
+        </Logger>
+
+        <!-- Root 로거도 ERROR 레벨로 제한 -->
+        <Root level="ERROR">
+            <AppenderRef ref="ConsoleAppender"/>
+        </Root>
+    </Loggers>
+</Configuration>
