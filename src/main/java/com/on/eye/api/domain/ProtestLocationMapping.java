@@ -10,7 +10,7 @@ import lombok.NoArgsConstructor;
 @Entity
 @Table(
         name = "protest_location_mappings",
-        uniqueConstraints = {@UniqueConstraint(columnNames = {"protest_id", "sequence"})})
+        uniqueConstraints = {@UniqueConstraint(columnNames = {"protest_id", "location_id"})})
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class ProtestLocationMapping {
