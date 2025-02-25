@@ -10,7 +10,10 @@ import jakarta.validation.constraints.NotNull;
 
 import com.on.eye.api.validator.ValidProtestDateTimeRange;
 
+import lombok.Builder;
+
 @ValidProtestDateTimeRange
+@Builder
 public record ProtestCreateRequest(
         String title,
         @NotNull(message = "Start date and time cannot be null") LocalDateTime startDateTime,
