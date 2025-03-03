@@ -1,5 +1,12 @@
 cd ..
 
+echo "현재 디렉토리: $(pwd)"
+echo "docker-compose.yml 확인: $(ls -la docker-compose.yml 2>/dev/null || echo '파일 없음')"
+
+if not [ -f "docker-compose.yml" ]; then
+    echo "오류: docker-compose.yml 파일을 찾을 수 없습니다."
+    exit 1
+fi
 # 현재 상태 백업
 cp docker-compose.yml docker-compose.yml.backup
 
