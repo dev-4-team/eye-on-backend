@@ -1,5 +1,3 @@
-cd ..
-
 echo "현재 디렉토리: $(pwd)"
 echo "docker-compose.yml 확인: $(ls -la docker-compose.yml 2>/dev/null || echo '파일 없음')"
 
