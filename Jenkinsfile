@@ -35,7 +35,7 @@ pipeline {
             steps {
                 withCredentials([usernamePassword(credentialsId: 'dockerhub', passwordVariable: 'password', usernameVariable: 'username')]) {
                     sh "echo $password | docker login -u $username --password-stdin"
-                    sh """docker push $DOCKER_HUB_USERNAME/eye-on:${IMAGE_TAG ?: latest}"""
+                    sh """docker push $DOCKER_HUB_USERNAME/eye-on:latest"""
                 }
             }
         }
