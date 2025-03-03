@@ -27,8 +27,7 @@ pipeline {
         }
         stage('Build Docker Image') {
             steps {
-                sh """docker build -t $DOCKER_HUB_USERNAME/eye-on:${IMAGE_TAG:
-                -latest} ."""
+                sh """docker build -t $DOCKER_HUB_USERNAME/eye-on:${IMAGE_TAG ?: latest} ."""
             }
         }
         stage('Push Docker Image') {
@@ -37,8 +36,7 @@ pipeline {
                         passwordVariable: 'password',
                         usernameVariable: 'username')]) {
                     sh "echo \${password} | docker login -u \${username} --password-stdin"
-                    sh """docker push $DOCKER_HUB_USERNAME/eye-on:${IMAGE_TAG:
-                    -latest}"""
+                    sh """docker push $DOCKER_HUB_USERNAME/eye-on:${IMAGE_TAG ?: latest}"""
                 }
             }
         }
