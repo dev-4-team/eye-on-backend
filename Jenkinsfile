@@ -3,6 +3,7 @@ pipeline {
     environment {
         DOCKER_HUB_CREDS = credentials('dockerhub')
         APP_NAME = 'eye-on'
+        DOCKER_HUB_USERNAME = "smartcau95"
         DOCKER_IMAGE = "${DOCKER_HUB_USERNAME}/${APP_NAME}"
         IMAGE_TAG = "${env.BUILD_NUMBER}"
         DEPLOY_SERVER = "3.35.41.235"
@@ -27,7 +28,7 @@ pipeline {
         }
         stage('Build Docker Image') {
             steps {
-                sh """docker build -t $DOCKER_HUB_USERNAME/eye-on:${IMAGE_TAG ?: latest} ."""
+                sh """docker build -t $DOCKER_HUB_USERNAME/eye-on:latest ."""
             }
         }
         stage('Push Docker Image') {
@@ -35,7 +36,7 @@ pipeline {
                 withCredentials([usernamePassword(credentialsId: 'dockerhub',
                         passwordVariable: 'password',
                         usernameVariable: 'username')]) {
-                    sh "echo \${password} | docker login -u \${username} --password-stdin"
+                    sh "cat ~/docker_password.txt | docker login -u smartcau95 --password-stdin"
                     sh """docker push $DOCKER_HUB_USERNAME/eye-on:${IMAGE_TAG ?: latest}"""
                 }
             }
