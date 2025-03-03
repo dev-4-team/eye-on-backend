@@ -64,6 +64,11 @@ app:
 hash:
   secret-key: ${HASH_SECRET_KEY}
 
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
 
 logging:
   config: classpath:log4j2-${spring.profiles.active}.xml
