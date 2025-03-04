@@ -1,8 +1,6 @@
 # 수정된 docker-compose.yml
 services:
   app:
-    env_file:
-      - .env
     image: smartcau95/eye-on:-latest
     ports:
       - "8080:8080"
