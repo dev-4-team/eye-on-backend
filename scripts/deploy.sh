@@ -21,6 +21,7 @@ echo "HASH_SECRET_KEY=${HASH_SECRET_KEY}" >> .env
 echo "DOCKER_HUB_USR=${DOCKER_HUB_USR}" >> .env
 echo "APP_NAME=${APP_NAME}" >> .env
 echo "BUILD_NUMBER=${BUILD_NUMBER}" >> .env
+echo "CONTAINER_NAME=${CONTAINER_NAME}" >> .env
 
 # 현재 상태 백업
 cp docker-compose.yml docker-compose.yml.backup

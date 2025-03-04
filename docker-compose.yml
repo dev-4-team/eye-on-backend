@@ -3,7 +3,8 @@ services:
   app:
     env_file:
       - .env
-    image: smartcau95/eye-on:latest
+    image: ${DOCKER_HUB_USR}/${APP_NAME}:${IMAGE_TAG}
+    container_name: ${CONTAINER_NAME}
     ports:
       - "8080:8080"
     restart: always
