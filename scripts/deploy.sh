@@ -1,10 +1,28 @@
 echo "현재 디렉토리: $(pwd)"
 echo "docker-compose.yml 확인: $(ls -la docker-compose.yml 2>/dev/null || echo '파일 없음')"
 
-if not [ -f "docker-compose.yml" ]; then
+find . -name "docker-compose.yml"
+
+if [ ! -f "docker-compose.yml" ]; then
     echo "오류: docker-compose.yml 파일을 찾을 수 없습니다."
     exit 1
 fi
+
+# 환경변수 세팅
+echo "DB_URL=${DB_URL}" > .env
+echo "DB_USERNAME=${DB_USERNAME}" >> .env
+echo "DB_PASSWORD=${DB_PASSWORD}" >> .env
+echo "KAKAO_CLIENT_ID=${KAKAO_CLIENT_ID}" >> .env
+echo "KAKAO_CLIENT_SECRET=${KAKAO_CLIENT_SECRET}" >> .env
+echo "JWT_SECRET_KEY=${JWT_SECRET_KEY}" >> .env
+echo "FRONT_BASE_URL=${FRONT_BASE_URL}" >> .env
+echo "BASE_URL=${BASE_URL}" >> .env
+echo "HASH_SECRET_KEY=${HASH_SECRET_KEY}" >> .env
+echo "DOCKER_HUB_USR=${DOCKER_HUB_USR}" >> .env
+echo "APP_NAME=${APP_NAME}" >> .env
+echo "BUILD_NUMBER=${BUILD_NUMBER}" >> .env
+echo "CONTAINER_NAME=${CONTAINER_NAME}" >> .env
+
 # 현재 상태 백업
 cp docker-compose.yml docker-compose.yml.backup
 

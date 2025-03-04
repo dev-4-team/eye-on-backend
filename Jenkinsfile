@@ -1,14 +1,9 @@
 pipeline {
     agent any
     environment {
-        DOCKER_HUB_CREDS = credentials('dockerhub')
-        APP_NAME = 'eye-on'
-        DOCKER_HUB_USERNAME = "smartcau95"
+        DOCKER_HUB_USERNAME = "${env.DOCKER_HUB_USR}"
+        IMAGE_TAG = "${env.IMAGE_TAG}"
         DOCKER_IMAGE = "${DOCKER_HUB_USERNAME}/${APP_NAME}"
-        IMAGE_TAG = "${env.BUILD_NUMBER}"
-        DEPLOY_SERVER = "3.35.41.235"
-        DEPLOY_USER = "ubuntu"
-        APP_PATH = "/eye-on-backend"
     }
     stages {
         stage('Checkout') {
@@ -23,19 +18,37 @@ pipeline {
         }
         stage('Test') {
             steps {
+                sh "printenv"
                 echo 'Testing...'
+            }
+        }
+        stage('Clean Running Container') {
+            steps {
+                sh '''
+                    # 기존 컨테이너가 존재하는지 확인
+                    if docker ps -a | grep -q ${CONTAINER_NAME}; then
+                        echo "기존 컨테이너 ${CONTAINER_NAME}을 중지하고 삭제합니다."
+                        docker stop ${CONTAINER_NAME} || true
+                        docker rm ${CONTAINER_NAME} || true
+                    else
+                        echo "실행 중인 ${CONTAINER_NAME} 컨테이너가 없습니다."
+                    fi
+                '''
             }
         }
         stage('Build Docker Image') {
             steps {
-                sh """docker build -t $DOCKER_HUB_USERNAME/eye-on:latest ."""
+                sh """
+                    docker image prune || true
+                    docker build -t $DOCKER_IMAGE:$IMAGE_TAG .          
+                    """
             }
         }
         stage('Push Docker Image') {
             steps {
                 withCredentials([usernamePassword(credentialsId: 'dockerhub', passwordVariable: 'password', usernameVariable: 'username')]) {
                     sh "echo $password | docker login -u $username --password-stdin"
-                    sh """docker push $DOCKER_HUB_USERNAME/eye-on:latest"""
+                    sh """docker push $DOCKER_IMAGE:$IMAGE_TAG"""
                 }
             }
         }
