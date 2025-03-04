@@ -2,6 +2,7 @@ pipeline {
     agent any
     environment {
         DOCKER_HUB_USERNAME = "${env.DOCKER_HUB_USR}"
+        IMAGE_TAG = "${env.IMAGE_TAG}"
         DOCKER_IMAGE = "${DOCKER_HUB_USERNAME}/${APP_NAME}"
     }
     stages {
@@ -17,6 +18,7 @@ pipeline {
         }
         stage('Test') {
             steps {
+                sh "printenv"
                 echo 'Testing...'
             }
         }
@@ -38,7 +40,7 @@ pipeline {
             steps {
                 sh """
                     docker image prune || true
-                    docker build -t $DOCKER_IMAGE:${IMAGE_TAG} .          
+                    docker build -t $DOCKER_IMAGE:IMAGE_TAG .          
                     """
             }
         }
@@ -46,7 +48,7 @@ pipeline {
             steps {
                 withCredentials([usernamePassword(credentialsId: 'dockerhub', passwordVariable: 'password', usernameVariable: 'username')]) {
                     sh "echo $password | docker login -u $username --password-stdin"
-                    sh """docker push $DOCKER_IMAGE:${IMAGE_TAG}"""
+                    sh """docker push $DOCKER_IMAGE:IMAGE_TAG"""
                 }
             }
         }
