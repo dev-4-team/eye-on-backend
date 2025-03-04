@@ -1,7 +1,7 @@
 pipeline {
     agent any
     environment {
-        DOCKER_HUB_USERNAME = $ { env.DOCKER_HUB_USR }
+        DOCKER_HUB_USERNAME = "${env.DOCKER_HUB_USR}"
         DOCKER_IMAGE = "${DOCKER_HUB_USERNAME}/${APP_NAME}"
     }
     stages {
