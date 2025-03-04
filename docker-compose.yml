@@ -1,9 +1,17 @@
 # 수정된 docker-compose.yml
 services:
   app:
+    env_file:
+      - .env
     image: smartcau95/eye-on:latest
     ports:
       - "8080:8080"
     restart: always
     volumes:
       - /var/log/eye-on:/app/logs
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:8080/actuator/health" ]
+      interval: 30s
+      timeout: 30s
+      retries: 3
+      start_period: 5s

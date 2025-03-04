@@ -23,6 +23,7 @@ pipeline {
         }
         stage('Test') {
             steps {
+                sh 'printenv'
                 echo 'Testing...'
             }
         }
