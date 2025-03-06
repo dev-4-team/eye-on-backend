@@ -68,12 +68,21 @@ pipeline {
         }
         success {
             echo '배포가 성공적으로 완료되었습니다!'
-            // 슬랙 같은 메시징 서비스로 알림 전송 가능
-            // slackSend channel: '#deployments', color: 'good', message: "${APP_NAME} 배포 성공"
+            withCredentials([string(credentialsId: 'discord-webhook', variable: 'WEBHOOK_URL')]) {
+                discordSend description: "[백엔드] 배포가 성공적으로 완료되었습니다.",
+                link: env.BUILD_URL, result: currentBuild.currentResult,
+                title: "Jenkins 배포 성공",
+                webhookURL: "$WEBHOOK_URL"
+            }
         }
         failure {
             echo '배포 중 오류가 발생했습니다!'
-            // slackSend channel: '#deployments', color: 'danger', message: "${APP_NAME} 배포 실패"
+            withCredentials([string(credentialsId: 'discord-webhook', variable: 'WEBHOOK_URL')]) {
+                discordSend description: "[백엔드] 배포가 실패하였습니다.",
+                link: env.BUILD_URL, result: currentBuild.currentResult,
+                title: "Jenkins 배포 실패",
+                webhookURL: "$WEBHOOK_URL"
+            }
         }
     }
 }
