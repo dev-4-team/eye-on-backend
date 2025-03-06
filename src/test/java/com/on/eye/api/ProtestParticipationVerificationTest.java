@@ -24,10 +24,12 @@ import com.on.eye.api.domain.ParticipantsVerification;
 import com.on.eye.api.dto.LocationDto;
 import com.on.eye.api.dto.ParticipateVerificationRequest;
 import com.on.eye.api.dto.ProtestCreateRequest;
+import com.on.eye.api.exception.AbnormalMovementPatternException;
 import com.on.eye.api.exception.DuplicateVerificationException;
 import com.on.eye.api.exception.OutOfValidProtestRangeException;
 import com.on.eye.api.repository.LocationRepository;
 import com.on.eye.api.repository.ParticipantVerificationRepository;
+import com.on.eye.api.repository.ProtestRepository;
 import com.on.eye.api.repository.ProtestVerificationRepository;
 import com.on.eye.api.service.ProtestService;
 
@@ -46,21 +48,37 @@ class ProtestParticipationVerificationTest {
 
     private Long testProtestId;
     private Location testLocation;
+    private LocationDto testLocationDto;
+    private ParticipateVerificationRequest testParticipateVerificationRequest;
     private static final Long TEST_USER_ID = 1L;
     private final AtomicBoolean cleanUpExecuted = new AtomicBoolean(false);
 
     @Autowired private ProtestVerificationRepository protestVerificationRepository;
+    @Autowired private ProtestRepository protestRepository;
 
     @BeforeAll
     void setUp() {
+        // 테스트용 시위 및 위치 데이터 생성
+        testLocationDto =
+                new LocationDto("테스트 장소", new BigDecimal("37.5665"), new BigDecimal("126.9780"));
+        // 테스트용 위치 생성
+        testLocation =
+                Location.builder()
+                        .name(testLocationDto.name())
+                        .latitude(testLocationDto.latitude())
+                        .longitude(testLocationDto.longitude())
+                        .build();
+        testParticipateVerificationRequest =
+                new ParticipateVerificationRequest(
+                        testLocation.getLongitude(), testLocation.getLatitude());
         // 테스트용 사용자 인증 컨텍스트 설정
         setUpSecurityContext();
     }
 
     @BeforeEach
     void beforeEach() {
-        // 테스트용 시위 및 위치 데이터 생성
-        createTestProtest();
+
+        testProtestId = createTestProtest(testLocationDto);
     }
 
     @AfterEach
@@ -76,14 +94,9 @@ class ProtestParticipationVerificationTest {
     @Test
     @DisplayName("유효한 반경 내에서 시위 참여 인증 성공")
     void verifyParticipationWithinRadius() {
-        // Given
-        ParticipateVerificationRequest request =
-                new ParticipateVerificationRequest(
-                        testLocation.getLongitude(), // 정확히 같은 위치
-                        testLocation.getLatitude());
-
         // When
-        Boolean result = protestService.participateVerify(testProtestId, request);
+        Boolean result =
+                protestService.participateVerify(testProtestId, testParticipateVerificationRequest);
 
         // Then
         assertThat(result).isTrue();
@@ -106,18 +119,35 @@ class ProtestParticipationVerificationTest {
     @Test
     @DisplayName("동일 시위에 대한 중복 인증 시도 실패")
     void preventDuplicateVerification() {
-        // Given
-        ParticipateVerificationRequest request =
-                new ParticipateVerificationRequest(
-                        testLocation.getLongitude(), testLocation.getLatitude());
-
         // When & Then
         // 첫 번째 인증
-        protestService.participateVerify(testProtestId, request);
+        protestService.participateVerify(testProtestId, testParticipateVerificationRequest);
 
         // 두 번째 인증 시도
-        assertThatThrownBy(() -> protestService.participateVerify(testProtestId, request))
+        assertThatThrownBy(
+                        () ->
+                                protestService.participateVerify(
+                                        testProtestId, testParticipateVerificationRequest))
                 .isInstanceOf(DuplicateVerificationException.class);
+    }
+
+    @Test
+    @DisplayName("비정상적인 이동속도 인증 시도 실패")
+    void preventTooFastVerification() {
+        // Given
+        protestService.participateVerify(testProtestId, testParticipateVerificationRequest);
+
+        LocationDto farLocation =
+                new LocationDto("많이 먼 시위", new BigDecimal("38.5665"), new BigDecimal("126.9780"));
+        Long farProtestId = createTestProtest(farLocation);
+
+        // When
+        ParticipateVerificationRequest farRequest =
+                new ParticipateVerificationRequest(farLocation.longitude(), farLocation.latitude());
+
+        // Then
+        assertThatThrownBy(() -> protestService.participateVerify(farProtestId, farRequest))
+                .isInstanceOf(AbnormalMovementPatternException.class);
     }
 
     private void setUpSecurityContext() {
@@ -129,18 +159,7 @@ class ProtestParticipationVerificationTest {
         SecurityContextHolder.getContext().setAuthentication(authentication);
     }
 
-    private void createTestProtest() {
-        // 테스트용 위치 생성
-        LocationDto locationDto =
-                new LocationDto("테스트 장소", new BigDecimal("37.5665"), new BigDecimal("126.9780"));
-
-        testLocation =
-                Location.builder()
-                        .name(locationDto.name())
-                        .latitude(locationDto.latitude())
-                        .longitude(locationDto.longitude())
-                        .build();
-
+    private Long createTestProtest(LocationDto locationDto) {
         // 테스트용 시위 생성
         ProtestCreateRequest protestRequest =
                 ProtestCreateRequest.builder()
@@ -153,7 +172,8 @@ class ProtestParticipationVerificationTest {
                         .build();
 
         List<Long> protestIds = protestService.createProtest(List.of(protestRequest));
-        testProtestId = protestIds.get(0);
+
+        return protestIds.get(0);
     }
 
     void cleanUp() {
@@ -164,6 +184,7 @@ class ProtestParticipationVerificationTest {
         participantVerificationRepository.deleteAll(verifications);
 
         locationRepository.delete(testLocation);
+        protestRepository.deleteById(testProtestId);
         log.info("Cleanup complete.");
     }
 
