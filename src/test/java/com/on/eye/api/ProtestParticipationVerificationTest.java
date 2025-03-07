@@ -5,13 +5,11 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.junit.jupiter.api.*;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -20,17 +18,13 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.test.context.ActiveProfiles;
 
 import com.on.eye.api.domain.Location;
-import com.on.eye.api.domain.ParticipantsVerification;
 import com.on.eye.api.dto.LocationDto;
 import com.on.eye.api.dto.ParticipateVerificationRequest;
 import com.on.eye.api.dto.ProtestCreateRequest;
 import com.on.eye.api.exception.AbnormalMovementPatternException;
 import com.on.eye.api.exception.DuplicateVerificationException;
 import com.on.eye.api.exception.OutOfValidProtestRangeException;
-import com.on.eye.api.repository.LocationRepository;
-import com.on.eye.api.repository.ParticipantVerificationRepository;
 import com.on.eye.api.repository.ProtestRepository;
-import com.on.eye.api.repository.ProtestVerificationRepository;
 import com.on.eye.api.service.ProtestService;
 
 @SpringBootTest
@@ -39,21 +33,15 @@ import com.on.eye.api.service.ProtestService;
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 class ProtestParticipationVerificationTest {
 
-    private static final Logger log =
-            LoggerFactory.getLogger(ProtestParticipationVerificationTest.class);
     @Autowired private ProtestService protestService;
 
-    @Autowired private LocationRepository locationRepository;
-    @Autowired private ParticipantVerificationRepository participantVerificationRepository;
-
     private Long testProtestId;
+    private final List<Long> createdProtestIds = new ArrayList<>();
     private Location testLocation;
     private LocationDto testLocationDto;
     private ParticipateVerificationRequest testParticipateVerificationRequest;
     private static final Long TEST_USER_ID = 1L;
-    private final AtomicBoolean cleanUpExecuted = new AtomicBoolean(false);
 
-    @Autowired private ProtestVerificationRepository protestVerificationRepository;
     @Autowired private ProtestRepository protestRepository;
 
     @BeforeAll
@@ -77,7 +65,6 @@ class ProtestParticipationVerificationTest {
 
     @BeforeEach
     void beforeEach() {
-
         testProtestId = createTestProtest(testLocationDto);
     }
 
@@ -88,7 +75,7 @@ class ProtestParticipationVerificationTest {
 
     @AfterAll
     void afterAll() {
-        performCleanup();
+        SecurityContextHolder.clearContext();
     }
 
     @Test
@@ -172,34 +159,12 @@ class ProtestParticipationVerificationTest {
                         .build();
 
         List<Long> protestIds = protestService.createProtest(List.of(protestRequest));
-
-        return protestIds.get(0);
+        Long createdProtestId = protestIds.get(0);
+        createdProtestIds.add(createdProtestId);
+        return createdProtestId;
     }
 
     void cleanUp() {
-        log.info("Cleaning up...");
-        List<ParticipantsVerification> verifications =
-                participantVerificationRepository.getParticipantsVerificationByProtest_Id(
-                        testProtestId);
-        participantVerificationRepository.deleteAll(verifications);
-
-        locationRepository.delete(testLocation);
-        protestRepository.deleteById(testProtestId);
-        log.info("Cleanup complete.");
-    }
-
-    private void performCleanup() {
-        if (cleanUpExecuted.compareAndSet(false, true)) {
-            try {
-                log.info("Executing cleanup...");
-                cleanUp();
-                cleanUpExecuted.set(true);
-                SecurityContextHolder.clearContext();
-                log.info("Cleanup complete.");
-            } catch (Exception e) {
-                log.error("Cleanup failed.", e);
-                throw e;
-            }
-        }
+        protestRepository.deleteAllById(createdProtestIds);
     }
 }
