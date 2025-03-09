@@ -47,6 +47,9 @@ public class Protest {
     @OneToOne(mappedBy = "protest", cascade = CascadeType.ALL, orphanRemoval = true)
     private ProtestVerification protestVerification;
 
+    @OneToMany(mappedBy = "protest", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<ParticipantsVerification> participantsVerifications;
+
     @Column(nullable = false)
     @Min(1)
     @Max(5000000)

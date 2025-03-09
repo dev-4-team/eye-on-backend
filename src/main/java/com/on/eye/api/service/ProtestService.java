@@ -1,5 +1,8 @@
 package com.on.eye.api.service;
 
+import static com.on.eye.api.util.GeoUtils.haversineDistance;
+
+import java.time.Duration;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Comparator;
@@ -14,11 +17,14 @@ import com.on.eye.api.config.security.AnonymousIdGenerator;
 import com.on.eye.api.config.security.SecurityUtils;
 import com.on.eye.api.domain.*;
 import com.on.eye.api.dto.*;
+import com.on.eye.api.exception.AbnormalMovementPatternException;
 import com.on.eye.api.exception.DuplicateVerificationException;
 import com.on.eye.api.exception.OutOfValidProtestRangeException;
 import com.on.eye.api.exception.ProtestNotFoundException;
+import com.on.eye.api.exception.protest.LocationNotFoundException;
 import com.on.eye.api.mapper.ProtestMapper;
 import com.on.eye.api.repository.*;
+import com.on.eye.api.util.GeoUtils;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -226,7 +232,6 @@ public class ProtestService {
                 .orElseThrow(() -> ProtestNotFoundException.EXCEPTION);
     }
 
-    // TODO: 성능개선 여지 있음. Thread 간에는 Transaction 안먹힘
     @Transactional
     public Boolean participateVerify(Long protestId, ParticipateVerificationRequest request) {
         Long userId = SecurityUtils.getCurrentUserId();
@@ -234,19 +239,32 @@ public class ProtestService {
 
         ProtestLocationDto protestLocationDto = getProtestLocationDto(protest);
 
-        Double distance =
-                locationRepository.calculateDistance(
-                        request.latitude(), request.longitude(), protestLocationDto.locationId());
+        Location location =
+                locationRepository
+                        .findById(protestLocationDto.locationId())
+                        .orElseThrow(() -> LocationNotFoundException.EXCEPTION);
 
-        if (distance == null) throw ProtestNotFoundException.EXCEPTION;
-
+        // 유효 반경 내 인증인지 검증
+        double distance =
+                haversineDistance(
+                        location.getLatitude(),
+                        location.getLongitude(),
+                        request.latitude(),
+                        request.longitude());
         boolean isWithInRadius = distance <= protest.getRadius();
-
         if (!isWithInRadius) throw OutOfValidProtestRangeException.EXCEPTION;
 
         try {
-            String anonymousUserId =
-                    anonymousIdGenerator.generateAnonymousUserId(userId, protestId);
+            String anonymousUserId = anonymousIdGenerator.generateAnonymousUserId(userId);
+
+            participantVerificationRepository
+                    .getVerifiedParticipantsByDateTime(
+                            LocalDateTime.now().withHour(0), anonymousUserId)
+                    .ifPresent(
+                            recentVerifications -> {
+                                detectAbnormalMovementPattern(request, recentVerifications);
+                            });
+
             ParticipantsVerification verification =
                     ParticipantsVerification.builder()
                             .anonymousUserId(anonymousUserId)
@@ -255,6 +273,7 @@ public class ProtestService {
             participantVerificationRepository.save(verification);
             updateProtestVerification(protest);
         } catch (DataIntegrityViolationException e) {
+            // 중복 인증 검증
             throw DuplicateVerificationException.EXCEPTION;
         }
 
@@ -285,5 +304,28 @@ public class ProtestService {
         ProtestVerification protestVerification =
                 protestVerificationRepository.findByProtestId(protest.getId());
         return List.of(ProtestVerificationResponse.from(protestVerification));
+    }
+
+    private void detectAbnormalMovementPattern(
+            ParticipateVerificationRequest verificationRequest,
+            VerificationHistory oldVerificationHistory) {
+        final double MAX_SPEED_MPS = 16; // 약 시속 60km
+
+        double distanceDiff =
+                GeoUtils.haversineDistance(
+                        verificationRequest.latitude(),
+                        verificationRequest.longitude(),
+                        oldVerificationHistory.latitude(),
+                        oldVerificationHistory.longitude());
+        long timeDiff =
+                Duration.between(oldVerificationHistory.verifiedAt(), LocalDateTime.now())
+                        .getSeconds();
+        if (timeDiff < 1) timeDiff = 1;
+
+        double speedInMeterPerSec = distanceDiff / timeDiff;
+
+        if (speedInMeterPerSec > MAX_SPEED_MPS) {
+            throw AbnormalMovementPatternException.EXCEPTION;
+        }
     }
 }
