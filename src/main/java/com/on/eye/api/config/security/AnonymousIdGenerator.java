@@ -23,6 +23,17 @@ public class AnonymousIdGenerator {
     @Value("${hash.secret-key}")
     private String secretKey;
 
+    /**
+     * Generates a hashed anonymous identifier for the given user ID using HMAC-SHA256.
+     *
+     * <p>This method converts the user ID to its string representation and computes a hash using a secret key.
+     * The hash is then formatted as a hexadecimal string. If the HMAC algorithm is unavailable or the secret key
+     * is invalid, a HashNotGeneratedException is thrown.
+     *
+     * @param userId the user identifier to be hashed
+     * @return the hexadecimal representation of the generated hash
+     * @throws HashNotGeneratedException if a cryptographic error prevents hash generation
+     */
     public String generateAnonymousUserId(Long userId) {
         try {
             SecretKeySpec keySpec =

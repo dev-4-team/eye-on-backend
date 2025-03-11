@@ -225,6 +225,16 @@ public class ProtestService {
                 .toList();
     }
 
+    /**
+     * Retrieves the first location associated with the specified protest.
+     *
+     * <p>This method extracts the protest's identifier and queries the location repository for the first
+     * associated location. If no location is found, a {@link ProtestNotFoundException} is thrown.
+     *
+     * @param protest the protest entity for which to fetch the location
+     * @return the first {@code ProtestLocationDto} associated with the protest
+     * @throws ProtestNotFoundException if no location is found for the protest
+     */
     private ProtestLocationDto getProtestLocationDto(Protest protest) {
         Long id = protest.getId();
         return locationRepository
@@ -232,6 +242,23 @@ public class ProtestService {
                 .orElseThrow(() -> ProtestNotFoundException.EXCEPTION);
     }
 
+    /**
+     * Verifies a user's participation in a protest by confirming that the provided location is within the valid area,
+     * detecting abnormal movement patterns, and recording the verification.
+     *
+     * <p>This method retrieves the protest's details and primary location, calculates the distance from the participant's
+     * reported coordinates using the haversine formula, and checks whether the participant is within the protest's radius.
+     * It then generates an anonymous user ID and verifies if a recent verification exists to detect any abnormal movement.
+     * If all checks pass, the participant's verification is recorded and the protest's verification count is updated.
+     *
+     * @param protestId the ID of the protest for which participation is being verified
+     * @param request the verification request containing the participant's latitude and longitude
+     * @return true if the participation verification is successfully recorded
+     * @throws LocationNotFoundException if the protest's location cannot be found
+     * @throws OutOfValidProtestRangeException if the participant's location is outside the allowed protest radius
+     * @throws DuplicateVerificationException if a duplicate verification is detected
+     * @throws AbnormalMovementPatternException if an abnormal movement pattern is detected from recent verifications
+     */
     @Transactional
     public Boolean participateVerify(Long protestId, ParticipateVerificationRequest request) {
         Long userId = SecurityUtils.getCurrentUserId();
@@ -284,6 +311,19 @@ public class ProtestService {
         protestVerificationRepository.increaseVerifiedNum(protest.getId());
     }
 
+    /**
+     * Retrieves verification records for protests.
+     *
+     * <p>If the protest ID is provided, returns the verification record for that specific protest.
+     * Otherwise, returns verification records for all protests starting after the beginning of the given date.
+     * Note that the resulting list may include null entries for protests lacking an associated verification record.
+     *
+     * @param protestId the unique identifier of the protest; if null, verifications for all protests
+     *                  starting after the specified date are retrieved
+     * @param date the date to use as a threshold when retrieving protests for verification
+     * @return a list of {@code ProtestVerificationResponse} objects representing the verification records
+     * @throws ProtestNotFoundException if a protest with the specified ID does not exist
+     */
     public List<ProtestVerificationResponse> getProtestVerifications(
             Long protestId, LocalDate date) {
         if (protestId == null) {
@@ -306,6 +346,16 @@ public class ProtestService {
         return List.of(ProtestVerificationResponse.from(protestVerification));
     }
 
+    /**
+     * Validates the movement pattern between the current verification request and the previous verification record.
+     * It computes the distance between the two points using the Haversine formula and the time difference between the
+     * previous verification and now, then calculates the speed. If the computed speed exceeds 16 m/s (approximately 60 km/h),
+     * an AbnormalMovementPatternException is thrown.
+     *
+     * @param verificationRequest the current verification request containing the latitude and longitude
+     * @param oldVerificationHistory the previous verification record with its associated coordinates and timestamp
+     * @throws AbnormalMovementPatternException if the calculated speed exceeds the maximum allowed threshold
+     */
     private void detectAbnormalMovementPattern(
             ParticipateVerificationRequest verificationRequest,
             VerificationHistory oldVerificationHistory) {
