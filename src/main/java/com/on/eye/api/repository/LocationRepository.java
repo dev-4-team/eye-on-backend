@@ -1,6 +1,5 @@
 package com.on.eye.api.repository;
 
-import java.math.BigDecimal;
 import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -22,22 +21,6 @@ public interface LocationRepository extends JpaRepository<Location, Long> {
             nativeQuery = true)
     Optional<Location> findMostSimilarLocation(
             @Param("searchName") String searchName, @Param("threshold") double threshold);
-
-    @Query(
-            value =
-                    """
-                                 SELECT earth_distance(
-                                     ll_to_earth(:userLat, :userLng),
-                                     ll_to_earth(l.latitude, l.longitude)
-                                     )
-                                 FROM locations l
-                                 WHERE l.id = :locationId
-                            """,
-            nativeQuery = true)
-    Double calculateDistance(
-            @Param("userLat") BigDecimal userLat,
-            @Param("userLng") BigDecimal userLng,
-            @Param("locationId") Long locationId);
 
     @Query(
             """

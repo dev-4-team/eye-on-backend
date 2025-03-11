@@ -23,7 +23,7 @@ public class AnonymousIdGenerator {
     @Value("${hash.secret-key}")
     private String secretKey;
 
-    public String generateAnonymousUserId(Long userId, Long protestId) {
+    public String generateAnonymousUserId(Long userId) {
         try {
             SecretKeySpec keySpec =
                     new SecretKeySpec(secretKey.getBytes(StandardCharsets.UTF_8), HAMAC_SHA256);
@@ -31,7 +31,7 @@ public class AnonymousIdGenerator {
             Mac mac = Mac.getInstance(HAMAC_SHA256);
             mac.init(keySpec);
 
-            String message = String.format("%d:%d", protestId, userId);
+            String message = userId.toString();
             byte[] hash = mac.doFinal(message.getBytes(StandardCharsets.UTF_8));
 
             return HexFormat.of().formatHex(hash);

@@ -20,7 +20,7 @@ public class ParticipantsVerification {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @OneToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "protest_id", nullable = false, updatable = false)
     private Protest protest;
 
