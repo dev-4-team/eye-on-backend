@@ -4,8 +4,4 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 public record VerificationHistory(
-        String anonymousUserId,
-        Long protestId,
-        BigDecimal latitude,
-        BigDecimal longitude,
-        LocalDateTime verifiedAt) {}
+        Long protestId, BigDecimal latitude, BigDecimal longitude, LocalDateTime verifiedAt) {}

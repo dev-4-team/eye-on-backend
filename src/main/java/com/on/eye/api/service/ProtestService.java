@@ -258,12 +258,11 @@ public class ProtestService {
             String anonymousUserId = anonymousIdGenerator.generateAnonymousUserId(userId);
 
             participantVerificationRepository
-                    .getVerifiedParticipantsByDateTime(
+                    .findMostRecentVerificationByUserSince(
                             LocalDateTime.now().withHour(0), anonymousUserId)
                     .ifPresent(
-                            recentVerifications -> {
-                                detectAbnormalMovementPattern(request, recentVerifications);
-                            });
+                            recentVerifications ->
+                                    detectAbnormalMovementPattern(request, recentVerifications));
 
             ParticipantsVerification verification =
                     ParticipantsVerification.builder()

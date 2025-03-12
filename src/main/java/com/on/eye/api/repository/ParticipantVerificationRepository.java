@@ -16,14 +16,14 @@ public interface ParticipantVerificationRepository
 
     @Query(
             """
-                    SELECT new com.on.eye.api.dto.VerificationHistory(:anonUserId, p.id, l.latitude, l.longitude, pv.verifiedAt)  FROM ParticipantsVerification pv
+                    SELECT new com.on.eye.api.dto.VerificationHistory(p.id, l.latitude, l.longitude, pv.verifiedAt)  FROM ParticipantsVerification pv
                                 JOIN pv.protest p
                                 JOIN p.locationMappings plm
                                 JOIN plm.location l
-                            WHERE pv.anonymousUserId = :anonUserId and pv.protest.startDateTime >= :today
+                            WHERE pv.anonymousUserId = :anonUserId and p.startDateTime >= :today
                             ORDER BY pv.verifiedAt DESC
-                            LIMIT 1
+                            FETCH FIRST 1 ROW ONLY
                     """)
-    Optional<VerificationHistory> getVerifiedParticipantsByDateTime(
+    Optional<VerificationHistory> findMostRecentVerificationByUserSince(
             LocalDateTime today, String anonUserId);
 }
