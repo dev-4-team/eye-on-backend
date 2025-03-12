@@ -48,7 +48,7 @@ public class Protest {
     private ProtestVerification protestVerification;
 
     @OneToMany(mappedBy = "protest", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<ParticipantsVerification> participantsVerifications;
+    private List<ParticipantsVerification> participantsVerifications = new ArrayList<>();
 
     @Column(nullable = false)
     @Min(1)
