@@ -8,10 +8,14 @@ import java.util.stream.Collectors;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.ConstraintViolationException;
 
+import org.springframework.dao.DataAccessException;
+import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.dao.QueryTimeoutException;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
+import org.springframework.jdbc.BadSqlGrammarException;
 import org.springframework.lang.NonNull;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -135,5 +139,56 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 
         log.warn("제약 조건 위반 - URL: {}, 오류: {}", request.getRequestURL(), bindingErrors);
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
+    }
+
+    @ExceptionHandler(DataAccessException.class)
+    public ResponseEntity<ErrorResponse> handleDataAccessException(
+            DataAccessException ex, HttpServletRequest request) {
+
+        log.error("데이터베이스 액세스 예외 발생 - URL: {}, 예외: {} ", request.getRequestURL(), ex);
+
+        // 예외 타입에 따라 다른 메시지와 상태 코드 반환
+        HttpStatus status = HttpStatus.INTERNAL_SERVER_ERROR;
+        String message = "데이터베이스 작업 중 오류가 발생했습니다.";
+
+        // 특정 예외 유형에 따라 처리 분기
+        if (ex instanceof DataIntegrityViolationException) {
+            status = HttpStatus.BAD_REQUEST;
+            message = "데이터 무결성 제약 조건을 위반했습니다.";
+        } else if (ex instanceof QueryTimeoutException) {
+            message = "데이터베이스 쿼리 시간이 초과되었습니다.";
+        } else if (ex instanceof BadSqlGrammarException) {
+            message = "잘못된 SQL 쿼리가 실행되었습니다.";
+            // 이 정보는 내부 개발 문제이므로 500 유지
+        }
+
+        ErrorReason errorReason =
+                ErrorReason.builder()
+                        .status(status.value())
+                        .code("DATABASE_EXCEPTION")
+                        .message(message)
+                        .build();
+
+        ErrorResponse errorResponse =
+                new ErrorResponse(errorReason, request.getRequestURL().toString());
+
+        return ResponseEntity.status(status).body(errorResponse);
+    }
+
+    @ExceptionHandler(Exception.class)
+    public ResponseEntity<ErrorResponse> handleException(Exception ex, HttpServletRequest request) {
+        log.error("처리되지 않은 예외 발생 - URL: {}, 예외: {} ", request.getRequestURL(), ex);
+
+        ErrorReason errorReason =
+                ErrorReason.builder()
+                        .status(HttpStatus.INTERNAL_SERVER_ERROR.value())
+                        .code("UNDEFINED_INTERNAL_SERVER_ERROR")
+                        .message(ex.getMessage())
+                        .build();
+
+        ErrorResponse errorResponse =
+                new ErrorResponse(errorReason, request.getRequestURL().toString());
+
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
     }
 }
