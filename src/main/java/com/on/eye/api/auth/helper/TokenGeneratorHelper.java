@@ -4,7 +4,7 @@ import com.on.eye.api.auth.jwt.JwtTokenProvider;
 import com.on.eye.api.auth.model.dto.ProfileViewDto;
 import com.on.eye.api.auth.model.entity.User;
 import com.on.eye.api.auth.model.response.TokenAndUserResponse;
-import com.on.eye.api.common.annotation.Helper;
+import com.on.eye.api.global.common.annotation.Helper;
 
 import lombok.RequiredArgsConstructor;
 
