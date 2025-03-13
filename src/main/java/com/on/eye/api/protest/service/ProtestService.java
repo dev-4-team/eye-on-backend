@@ -20,10 +20,8 @@ import com.on.eye.api.location.dto.LocationDto;
 import com.on.eye.api.location.dto.ProtestLocationDto;
 import com.on.eye.api.location.entity.Location;
 import com.on.eye.api.location.entity.ProtestLocationMapping;
-import com.on.eye.api.location.error.exception.LocationNotFoundException;
-import com.on.eye.api.location.repository.LocationRepository;
-import com.on.eye.api.organizer.entity.Organizer;
-import com.on.eye.api.organizer.repository.OrganizerRepository;
+import com.on.eye.api.location.service.LocationService;
+import com.on.eye.api.organizer.service.OrganizerService;
 import com.on.eye.api.protest.dto.*;
 import com.on.eye.api.protest.entity.ParticipantsVerification;
 import com.on.eye.api.protest.entity.Protest;
@@ -45,11 +43,12 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class ProtestService {
     private final ProtestRepository protestRepository;
-    private final LocationRepository locationRepository;
     private final ParticipantVerificationRepository participantVerificationRepository;
     private final ProtestVerificationRepository protestVerificationRepository;
     private final AnonymousIdGenerator anonymousIdGenerator;
-    private final OrganizerRepository organizerRepository;
+
+    private final OrganizerService organizerService;
+    private final LocationService locationService;
 
     @Transactional
     public List<Long> createProtest(List<ProtestCreateRequest> protestCreateRequests) {
@@ -64,7 +63,7 @@ public class ProtestService {
         setLocationMappings(protestCreateMappings);
         log.debug("시위 장소 정보 매핑 완료");
 
-        checkOrganizer(protestCreateMappings);
+        organizerService.checkOrganizer(protestCreateMappings);
 
         // ProtestLocationMapping도 Casacade 설정으로 함께 저장됨
         List<Protest> protests =
@@ -84,34 +83,6 @@ public class ProtestService {
 
         log.info("시위 {}건 생성 완료. 생성된 ID: {}", protests.size(), response);
         return response;
-    }
-
-    private void checkOrganizer(List<ProtestCreateMapping> protestCreateMappings) {
-        double threshold = 0.35;
-        protestCreateMappings.forEach(
-                createMapping ->
-                        organizerRepository
-                                .findBySimilarOrganizer(
-                                        createMapping.getProtestCreateRequest().organizer(),
-                                        threshold)
-                                .ifPresentOrElse(
-                                        organizer ->
-                                                createMapping.getProtest().setOrganizer(organizer),
-                                        () -> {
-                                            Organizer organizer =
-                                                    organizerRepository.save(
-                                                            Organizer.builder()
-                                                                    .name(
-                                                                            createMapping
-                                                                                    .getProtestCreateRequest()
-                                                                                    .organizer())
-                                                                    .title(
-                                                                            createMapping
-                                                                                    .getProtestCreateRequest()
-                                                                                    .title())
-                                                                    .build());
-                                            createMapping.getProtest().setOrganizer(organizer);
-                                        }));
     }
 
     @Transactional(readOnly = true)
@@ -196,26 +167,12 @@ public class ProtestService {
             ProtestCreateRequest protestCreateRequest = mapping.getProtestCreateRequest();
             for (LocationDto locationDto : protestCreateRequest.locations()) {
                 // Retrieve or create location
-                Location location = getOrCreateLocation(locationDto);
+                Location location = locationService.getOrCreateLocation(locationDto);
 
                 // Create and add mapping
                 createAndAddMapping(protest, location, sequence++);
             }
         }
-    }
-
-    private Location getOrCreateLocation(LocationDto locationDto) {
-        double similarity = 0.35;
-        return locationRepository
-                .findMostSimilarLocation(locationDto.name(), similarity)
-                .orElseGet(
-                        () ->
-                                locationRepository.save(
-                                        Location.builder()
-                                                .name(locationDto.name())
-                                                .latitude(locationDto.latitude())
-                                                .longitude(locationDto.longitude())
-                                                .build()));
     }
 
     private void createAndAddMapping(Protest protest, Location location, int sequence) {
@@ -236,30 +193,17 @@ public class ProtestService {
                 .toList();
     }
 
-    private ProtestLocationDto getProtestLocationDto(Protest protest) {
-        Long id = protest.getId();
-        return locationRepository
-                .findFirstLocationByProtestId(id)
-                .orElseThrow(() -> ProtestNotFoundException.EXCEPTION);
-    }
-
     @Transactional
     public Boolean participateVerify(Long protestId, ParticipateVerificationRequest request) {
         Long userId = SecurityUtils.getCurrentUserId();
         Protest protest = getProtestById(protestId, false);
-
-        ProtestLocationDto protestLocationDto = getProtestLocationDto(protest);
-
-        Location location =
-                locationRepository
-                        .findById(protestLocationDto.locationId())
-                        .orElseThrow(() -> LocationNotFoundException.EXCEPTION);
+        ProtestLocationDto protestLocationDto = locationService.getProtestCenterLocation(protest);
 
         // 유효 반경 내 인증인지 검증
         double distance =
                 haversineDistance(
-                        location.getLatitude(),
-                        location.getLongitude(),
+                        protestLocationDto.latitude(),
+                        protestLocationDto.longitude(),
                         request.latitude(),
                         request.longitude());
         boolean isWithInRadius = distance <= protest.getRadius();
