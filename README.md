@@ -57,3 +57,5 @@
 - LIKE 연산자로는 위와 같은 미묘한 차이를 잡아낼 수 없음
 - 이를 해결하기 위해 Fuzzy search 기능을 제공하는 PostgreSQL의 pg_bigm을 사용
 - 유사도 값을 튜닝하여 잘못된 지명이 입력되더라도, 기존 저장된 올바른 지명과 위경도를 사용하도록 함
+
+![CodeRabbit Pull Request Reviews](https://img.shields.io/coderabbit/prs/github/dev-4-team/eye-on-backend?utm_source=oss&utm_medium=github&utm_campaign=dev-4-team%2Feye-on-backend&labelColor=171717&color=FF570A&link=https%3A%2F%2Fcoderabbit.ai&label=CodeRabbit+Reviews)
