@@ -15,7 +15,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 @SpringBootApplication
-@ConfigurationPropertiesScan(basePackages = "com.on.eye.api.common.properties")
+@ConfigurationPropertiesScan(basePackages = "com.on.eye.api.global.common.properties")
 @EnableJpaAuditing
 @RequiredArgsConstructor
 @Slf4j

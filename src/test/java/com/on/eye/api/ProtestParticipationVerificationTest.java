@@ -17,15 +17,15 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.test.context.ActiveProfiles;
 
-import com.on.eye.api.domain.Location;
-import com.on.eye.api.dto.LocationDto;
-import com.on.eye.api.dto.ParticipateVerificationRequest;
-import com.on.eye.api.dto.ProtestCreateRequest;
-import com.on.eye.api.exception.AbnormalMovementPatternException;
-import com.on.eye.api.exception.DuplicateVerificationException;
-import com.on.eye.api.exception.OutOfValidProtestRangeException;
-import com.on.eye.api.repository.ProtestRepository;
-import com.on.eye.api.service.ProtestService;
+import com.on.eye.api.auth.error.exception.OutOfValidProtestRangeException;
+import com.on.eye.api.location.dto.LocationDto;
+import com.on.eye.api.location.entity.Location;
+import com.on.eye.api.protest.dto.ParticipateVerificationRequest;
+import com.on.eye.api.protest.dto.ProtestCreateRequest;
+import com.on.eye.api.protest.error.exception.AbnormalMovementPatternException;
+import com.on.eye.api.protest.error.exception.DuplicateVerificationException;
+import com.on.eye.api.protest.repository.ProtestRepository;
+import com.on.eye.api.protest.service.ProtestService;
 
 @SpringBootTest
 @ActiveProfiles("test")

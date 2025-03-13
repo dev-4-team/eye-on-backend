@@ -15,16 +15,16 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 
-import com.on.eye.api.domain.Location;
-import com.on.eye.api.domain.Organizer;
-import com.on.eye.api.domain.Protest;
-import com.on.eye.api.dto.LocationDto;
-import com.on.eye.api.dto.ProtestCreateRequest;
-import com.on.eye.api.dto.ProtestResponse;
-import com.on.eye.api.repository.LocationRepository;
-import com.on.eye.api.repository.OrganizerRepository;
-import com.on.eye.api.repository.ProtestRepository;
-import com.on.eye.api.service.ProtestService;
+import com.on.eye.api.location.dto.LocationDto;
+import com.on.eye.api.location.entity.Location;
+import com.on.eye.api.location.repository.LocationRepository;
+import com.on.eye.api.organizer.entity.Organizer;
+import com.on.eye.api.organizer.repository.OrganizerRepository;
+import com.on.eye.api.protest.dto.ProtestCreateRequest;
+import com.on.eye.api.protest.dto.ProtestResponse;
+import com.on.eye.api.protest.entity.Protest;
+import com.on.eye.api.protest.repository.ProtestRepository;
+import com.on.eye.api.protest.service.ProtestService;
 
 @SpringBootTest
 @ActiveProfiles("test")

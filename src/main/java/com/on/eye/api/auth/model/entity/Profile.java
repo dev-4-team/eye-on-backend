@@ -3,7 +3,7 @@ package com.on.eye.api.auth.model.entity;
 import jakarta.persistence.Embeddable;
 import jakarta.persistence.Embedded;
 
-import com.on.eye.api.common.model.vo.ImageVo;
+import com.on.eye.api.global.common.model.vo.ImageVo;
 
 import lombok.AccessLevel;
 import lombok.Builder;

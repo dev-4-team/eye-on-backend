@@ -1,7 +1,7 @@
 package com.on.eye.api.auth.model.vo;
 
 import com.on.eye.api.auth.model.entity.User;
-import com.on.eye.api.common.model.vo.ImageVo;
+import com.on.eye.api.global.common.model.vo.ImageVo;
 
 import lombok.Builder;
 import lombok.Getter;
