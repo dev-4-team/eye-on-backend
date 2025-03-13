@@ -4,11 +4,11 @@ import java.time.LocalDateTime;
 
 import jakarta.persistence.*;
 
+import com.on.eye.api.auth.error.exception.AlreadyDeletedUserException;
 import com.on.eye.api.auth.model.enums.AccountState;
 import com.on.eye.api.auth.model.enums.Role;
 import com.on.eye.api.auth.model.vo.UserProfileVo;
-import com.on.eye.api.common.model.entity.BaseTimeEntity;
-import com.on.eye.api.exception.AlreadyDeletedUserException;
+import com.on.eye.api.global.common.model.entity.BaseTimeEntity;
 
 import lombok.AccessLevel;
 import lombok.Builder;

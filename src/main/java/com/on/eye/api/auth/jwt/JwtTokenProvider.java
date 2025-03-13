@@ -1,7 +1,7 @@
 package com.on.eye.api.auth.jwt;
 
-import static com.on.eye.api.constants.AuthConstants.*;
-import static com.on.eye.api.constants.Constants.MILLI_TO_SECOND;
+import static com.on.eye.api.auth.constant.AuthConstants.*;
+import static com.on.eye.api.global.constants.Constants.MILLI_TO_SECOND;
 
 import java.nio.charset.StandardCharsets;
 import java.util.Date;
@@ -10,10 +10,10 @@ import javax.crypto.SecretKey;
 
 import org.springframework.stereotype.Component;
 
-import com.on.eye.api.common.model.dto.AccessTokenInfo;
-import com.on.eye.api.common.properties.JwtProperties;
-import com.on.eye.api.exception.ExpiredTokenException;
-import com.on.eye.api.exception.InvalidTokenException;
+import com.on.eye.api.auth.error.exception.ExpiredTokenException;
+import com.on.eye.api.auth.error.exception.InvalidTokenException;
+import com.on.eye.api.global.common.model.dto.AccessTokenInfo;
+import com.on.eye.api.global.common.properties.JwtProperties;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
