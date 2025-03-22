@@ -17,6 +17,9 @@ import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
 import org.springframework.jdbc.BadSqlGrammarException;
 import org.springframework.lang.NonNull;
+import org.springframework.messaging.handler.annotation.MessageExceptionHandler;
+import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
+import org.springframework.messaging.simp.annotation.SendToUser;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -188,6 +191,30 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 
         ErrorResponse errorResponse =
                 new ErrorResponse(errorReason, request.getRequestURL().toString());
+
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
+    }
+
+    @MessageExceptionHandler
+    @SendToUser("/queue/errors")
+    public ResponseEntity<ErrorResponse> handleMessageException(
+            Exception ex, SimpMessageHeaderAccessor headerAccessor) {
+        log.error("WebSocket 메시지 처리 중 오류 발생: {}", ex.getMessage());
+        if (ex instanceof CustomCodeException customCodeException) {
+            BaseErrorCode errorCode = customCodeException.getErrorCode();
+            ErrorReason errorReason = errorCode.getErrorReason();
+            return ResponseEntity.status(HttpStatus.valueOf(errorReason.getStatus()))
+                    .body(new ErrorResponse(errorReason, headerAccessor.getDestination()));
+        }
+        ErrorReason errorReason =
+                ErrorReason.builder()
+                        .status(HttpStatus.INTERNAL_SERVER_ERROR.value())
+                        .code("UNDEFINED_INTERNAL_WEBSOCKET_ERROR")
+                        .message(ex.getMessage())
+                        .build();
+
+        ErrorResponse errorResponse =
+                new ErrorResponse(errorReason, headerAccessor.getDestination());
 
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
     }
