@@ -40,7 +40,7 @@ public class ProtestDateTimeRangeValidator
         long hoursDifference =
                 Duration.between(createDto.startDateTime(), createDto.endDateTime()).toHours();
 
-        if (hoursDifference < 1 || hoursDifference > 24) {
+        if (hoursDifference > 24) {
             log.warn("시위 시간 범위 오류 - {} 시간", hoursDifference);
             return true;
         }
