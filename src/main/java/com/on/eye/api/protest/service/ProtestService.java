@@ -14,6 +14,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.on.eye.api.auth.error.exception.OutOfValidProtestRangeException;
+import com.on.eye.api.cheer.service.CheerSyncService;
 import com.on.eye.api.global.config.security.AnonymousIdGenerator;
 import com.on.eye.api.global.config.security.SecurityUtils;
 import com.on.eye.api.location.dto.LocationDto;
@@ -49,6 +50,7 @@ public class ProtestService {
 
     private final OrganizerService organizerService;
     private final LocationService locationService;
+    private final CheerSyncService cheerSyncService;
 
     @Transactional
     public List<Long> createProtest(List<ProtestCreateRequest> protestCreateRequests) {
@@ -80,6 +82,8 @@ public class ProtestService {
 
         List<Long> response =
                 protestRepository.saveAll(protests).stream().map(Protest::getId).toList();
+
+        cheerSyncService.updateTodayCheerCache(response);
 
         log.info("시위 {}건 생성 완료. 생성된 ID: {}", protests.size(), response);
         return response;
@@ -152,7 +156,7 @@ public class ProtestService {
         }
     }
 
-    private Protest getProtestById(Long id, boolean isWithOrganizer) {
+    public Protest getProtestById(Long id, boolean isWithOrganizer) {
         if (isWithOrganizer)
             return protestRepository
                     .findByProtestIdWithOrganizer(id)
