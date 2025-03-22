@@ -1,6 +1,7 @@
 package com.on.eye.api.global.config.security;
 
 import static com.on.eye.api.auth.constant.AuthConstants.ALLOW_URLS;
+import static com.on.eye.api.global.constants.Constants.CORS_ALLOW_LIST;
 
 import java.util.Arrays;
 
@@ -41,8 +42,6 @@ public class SecurityConfig {
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity httpSecurity) throws Exception {
-        // TODO: Swagger용 인증 우회 설정 가능
-
         return httpSecurity
                 .httpBasic(AbstractHttpConfigurer::disable)
                 .csrf(AbstractHttpConfigurer::disable)
@@ -96,9 +95,7 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(
-                Arrays.asList(
-                        "http://localhost:3000", "https://www.eye-on.kr", "https://eye-on.kr"));
+        configuration.setAllowedOrigins(Arrays.asList(CORS_ALLOW_LIST));
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         configuration.setAllowedHeaders(
                 Arrays.asList(
