@@ -37,12 +37,10 @@ spring:
     driver-class-name: org.postgresql.Driver
     username: ${DB_USERNAME}
     url: ${DB_URL}
+
   jpa:
-    show-sql: 'true'
     properties:
       hibernate:
-        format_sql: 'true'
-        use_sql_comments: 'true'
         default_batch_fetch_size: '100'
     open-in-view: false
     hibernate:
@@ -52,6 +50,14 @@ spring:
     enabled: true
     baseline-on-migrate: true
     locations: classpath:db/migrations
+  data:
+    redis:
+      host: ${REDIS_HOST}
+      port: ${REDIS_PORT}
+      # connection timeout
+      connect-timeout: 30s
+      # read timeout
+      timeout: 10s
 auth:
   jwt:
     secret-key: ${JWT_SECRET_KEY}
@@ -75,7 +81,6 @@ logging:
   level:
     web: DEBUG
     com.zaxxer.hikari.HikariConfig: DEBUG
-    com.zaxxer.hikari: TRACE
     org.springframework.orm.jpa: DEBUG
     org.springframework.transaction: DEBUG
     org.springframework.security: DEBUG

@@ -8,50 +8,52 @@
     <Appenders>
         <!-- Console -->
         <Console name="ConsoleAppender" target="SYSTEM_OUT">
-            <PatternLayout pattern="${LOG_PATTERN}" charset="UTF-8"/>
+            <PatternLayout
+                    pattern="%highlight{%d{HH:mm:ss.SSS} [%t] %-5level %logger{36} - %msg%n}{FATAL=red, ERROR=red, WARN=yellow, INFO=green, DEBUG=blue, TRACE=white}"
+                    charset="UTF-8"/>
         </Console>
 
         <!-- Application Log: INFO 레벨 이상 -->
         <RollingFile name="ApplicationAppender"
                      fileName="${FILE_PATH}/application.log"
                      filePattern="${FILE_PATH}/application.log">
-            <PatternLayout pattern="${LOG_PATTERN}" charset="UTF-8" />
+            <PatternLayout pattern="${LOG_PATTERN}" charset="UTF-8"/>
             <Policies>
                 <SizeBasedTriggeringPolicy size="10MB"/>
             </Policies>
             <DefaultRolloverStrategy max="1"/>
-            <ThresholdFilter level="INFO" onMatch="ACCEPT" onMismatch="DENY" />
+            <ThresholdFilter level="INFO" onMatch="ACCEPT" onMismatch="DENY"/>
         </RollingFile>
 
         <!-- Debug Log: DEBUG 레벨만 -->
         <RollingFile name="DebugAppender"
                      fileName="${FILE_PATH}/debug.log"
                      filePattern="${FILE_PATH}/debug.log">
-            <PatternLayout pattern="${LOG_PATTERN}" charset="UTF-8" />
+            <PatternLayout pattern="${LOG_PATTERN}" charset="UTF-8"/>
             <Policies>
                 <SizeBasedTriggeringPolicy size="10MB"/>
             </Policies>
             <DefaultRolloverStrategy max="1"/>
-            <LevelMatchFilter level="DEBUG" onMatch="ACCEPT" onMismatch="DENY" />
+            <LevelMatchFilter level="DEBUG" onMatch="ACCEPT" onMismatch="DENY"/>
         </RollingFile>
 
         <!-- Error Log: WARN 레벨 이상 -->
         <RollingFile name="ErrorAppender"
                      fileName="${FILE_PATH}/error.log"
                      filePattern="${FILE_PATH}/error.log">
-            <PatternLayout pattern="${LOG_PATTERN}" charset="UTF-8" />
+            <PatternLayout pattern="${LOG_PATTERN}" charset="UTF-8"/>
             <Policies>
                 <SizeBasedTriggeringPolicy size="10MB"/>
             </Policies>
             <DefaultRolloverStrategy max="1"/>
-            <ThresholdFilter level="WARN" onMatch="ACCEPT" onMismatch="DENY" />
+            <ThresholdFilter level="WARN" onMatch="ACCEPT" onMismatch="DENY"/>
         </RollingFile>
 
         <!-- Auth Log: 인증 과정에서 발생하는 로그 -->
         <RollingFile name="AuthAppender"
                      fileName="${FILE_PATH}/auth/auth.log"
                      filePattern="${FILE_PATH}/auth/auth.log">
-            <PatternLayout pattern="${LOG_PATTERN}" charset="UTF-8" />
+            <PatternLayout pattern="${LOG_PATTERN}" charset="UTF-8"/>
             <Policies>
                 <SizeBasedTriggeringPolicy size="10MB"/>
             </Policies>
@@ -62,9 +64,9 @@
         <RollingFile name="AccessAppender"
                      fileName="${FILE_PATH}/access/access.log"
                      filePattern="${FILE_PATH}/access/access.log">
-            <PatternLayout pattern="${LOG_PATTERN}" charset="UTF-8" />
+            <PatternLayout pattern="${LOG_PATTERN}" charset="UTF-8"/>
             <Policies>
-                <SizeBasedTriggeringPolicy size="10MB" />
+                <SizeBasedTriggeringPolicy size="10MB"/>
             </Policies>
             <DefaultRolloverStrategy max="1"/>
         </RollingFile>
@@ -109,8 +111,8 @@
         </Logger>
 
         <Root level="INFO">
-            <AppenderRef ref="AsyncApplicationAppender" />
-            <AppenderRef ref="AsyncErrorAppender" />
+            <AppenderRef ref="AsyncApplicationAppender"/>
+            <AppenderRef ref="AsyncErrorAppender"/>
             <AppenderRef ref="ConsoleAppender"/>
         </Root>
     </Loggers>
