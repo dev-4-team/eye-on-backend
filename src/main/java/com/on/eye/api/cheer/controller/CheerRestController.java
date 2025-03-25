@@ -1,13 +1,15 @@
 package com.on.eye.api.cheer.controller;
 
-import com.on.eye.api.cheer.dto.CheerStat;
-import com.on.eye.api.cheer.service.CheerCacheService;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
+import java.util.List;
+
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
+import com.on.eye.api.cheer.dto.CheerStat;
+import com.on.eye.api.cheer.service.CheerCacheService;
+
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * 응원 관련 REST API 컨트롤러 HTTP 요청을 통한 응원 기능을 제공. Polling vs WebSocket 비교 or WebSocket 불가능한 상황 대처 위해 생성
