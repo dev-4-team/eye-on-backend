@@ -1,0 +1,57 @@
+services:
+  prometheus:
+    image: prom/prometheus:v2.43.0
+    container_name: prometheus
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml
+      - prometheus-data:/prometheus
+    command:
+      - --config.file=/etc/prometheus/prometheus.yml
+      - --storage.tsdb.path=/prometheus
+      - --web.console.libraries=/etc/prometheus/console_libraries
+      - --web.console.templates=/etc/prometheus/consoles
+      - --web.enable-lifecycle
+      - --enable-feature=remote-write-receiver
+    networks:
+      - monitoring
+
+  grafana:
+    image: grafana/grafana:9.5.2
+    container_name: grafana
+    ports:
+      - "3000:3000"
+    volumes:
+      - grafana-storage:/var/lib/grafana
+    environment:
+      - GF_SECURITY_ADMIN_USER=admin
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+    depends_on:
+      - prometheus
+    networks:
+      - monitoring
+
+  k6:
+    image: grafana/k6:0.47.0
+    container_name: k6
+    ports:
+      - "6565:6565"
+    environment:
+      - K6_PROMETHEUS_RW_SERVER_URL=http://prometheus:9090/api/v1/write
+      - K6_OUT=experimental-prometheus-rw
+    volumes:
+      - ./scripts:/scripts
+    depends_on:
+      - prometheus
+    networks:
+      - monitoring
+    command: run /scripts/simple-test.js
+
+networks:
+  monitoring:
+    external: true
+
+volumes:
+  prometheus-data:
+  grafana-storage:
