@@ -1,18 +1,13 @@
 package com.on.eye.api.protest.dto;
 
-import java.time.LocalDateTime;
-import java.util.List;
-
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
-
 import com.on.eye.api.location.dto.LocationDto;
 import com.on.eye.api.organizer.entity.Organizer;
 import com.on.eye.api.protest.entity.Protest;
-import com.on.eye.api.protest.entity.ProtestStatus;
-
 import lombok.Builder;
 import lombok.Getter;
+
+import java.time.LocalDateTime;
+import java.util.List;
 
 @Getter
 public class ProtestResponse {
@@ -23,9 +18,6 @@ public class ProtestResponse {
     private final LocalDateTime endDateTime;
     private final String organizer;
     private final Integer declaredParticipants;
-
-    @Enumerated(EnumType.STRING)
-    private final ProtestStatus status;
 
     private final List<LocationDto> locations;
     private final Integer radius;
@@ -39,7 +31,6 @@ public class ProtestResponse {
             LocalDateTime endDateTime,
             String organizer,
             Integer declaredParticipants,
-            ProtestStatus status,
             List<LocationDto> locations,
             Integer radius) {
         this.id = id;
@@ -49,7 +40,6 @@ public class ProtestResponse {
         this.endDateTime = endDateTime;
         this.organizer = organizer;
         this.declaredParticipants = declaredParticipants;
-        this.status = status;
         this.locations = locations;
         this.radius = radius;
     }
@@ -63,7 +53,6 @@ public class ProtestResponse {
                         .startDateTime(protest.getStartDateTime())
                         .endDateTime(protest.getEndDateTime())
                         .declaredParticipants(protest.getDeclaredParticipants())
-                        .status(protest.getStatus())
                         .locations(locations);
         Organizer organizer = protest.getOrganizer();
         if (organizer != null) {
