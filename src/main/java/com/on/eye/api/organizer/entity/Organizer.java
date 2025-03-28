@@ -2,6 +2,8 @@ package com.on.eye.api.organizer.entity;
 
 import jakarta.persistence.*;
 
+import com.on.eye.api.organizer.dto.OrganizerDto;
+
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -30,5 +32,9 @@ public class Organizer {
         this.name = name;
         this.description = description;
         this.title = title;
+    }
+
+    public static Organizer from(OrganizerDto dto) {
+        return new Organizer(dto.name(), null, dto.title());
     }
 }
