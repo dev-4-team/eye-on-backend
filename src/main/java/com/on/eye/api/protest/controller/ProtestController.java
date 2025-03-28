@@ -1,20 +1,20 @@
 package com.on.eye.api.protest.controller;
 
-import java.time.LocalDate;
-import java.util.List;
-
+import com.on.eye.api.protest.dto.ParticipateVerificationRequest;
+import com.on.eye.api.protest.dto.ProtestCreateRequest;
+import com.on.eye.api.protest.dto.ProtestResponse;
+import com.on.eye.api.protest.dto.ProtestVerificationResponse;
+import com.on.eye.api.protest.service.ProtestService;
 import jakarta.validation.Valid;
-
+import lombok.RequiredArgsConstructor;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
-import com.on.eye.api.protest.dto.*;
-import com.on.eye.api.protest.service.ProtestService;
-
-import lombok.RequiredArgsConstructor;
+import java.time.LocalDate;
+import java.util.List;
 
 @RestController
 @RequestMapping("/protest")
@@ -50,7 +50,7 @@ public class ProtestController {
     public ResponseEntity<List<ProtestVerificationResponse>> getVerificationsNum(
             @RequestParam(required = false) Long protestId,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
-                    LocalDate date) {
+            LocalDate date) {
         if (date == null) date = LocalDate.now();
         List<ProtestVerificationResponse> response =
                 protestService.getProtestVerifications(protestId, date);
@@ -60,18 +60,11 @@ public class ProtestController {
     @GetMapping
     public ResponseEntity<List<ProtestResponse>> getProtestsBy(
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
-                    LocalDate date) {
+            LocalDate date) {
         if (date == null) {
             date = LocalDate.now();
         }
         List<ProtestResponse> protests = protestService.getProtestsBy(date);
         return ResponseEntity.ok(protests);
-    }
-
-    @PutMapping("/{id}")
-    public ResponseEntity<Long> updateProtest(
-            @PathVariable Long id, @Valid @RequestBody ProtestUpdateDto updateDto) {
-        Long updatedId = protestService.updateProtest(id, updateDto);
-        return ResponseEntity.ok(updatedId);
     }
 }
