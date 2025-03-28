@@ -32,7 +32,6 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 import static com.on.eye.api.protest.util.GeoUtils.haversineDistance;
 
@@ -115,37 +114,6 @@ public class ProtestService {
 
         log.info("날짜 별 시위 조회 완료 - 날짜: {}, 조회된 시위: {}건", date, response.size());
         return response;
-    }
-
-    public Long updateProtest(Long id, ProtestUpdateDto updateDto) {
-        log.info("시위 정보 수정 요청 - ID: {}", id);
-
-        // Find the protest by ID
-        Protest protest = getProtestById(id, true);
-        log.debug("시위 정보 조회 완료 - 제목: {}", protest.getTitle());
-
-        // Reflect non-null updateDto fields into the protest entity
-        applyUpdates(protest, updateDto);
-        log.debug("시위 정보 변경 적용 - 제목: {}", protest.getTitle());
-
-        // Save the updated entity back to the database
-        Protest updatedProtest = protestRepository.save(protest);
-
-        log.info("시위 정보 수정 완료 - ID: {}", updatedProtest.getId());
-        // Return the ID of the updated protest
-        return updatedProtest.getId();
-    }
-
-    private void applyUpdates(Protest protest, ProtestUpdateDto updateDto) {
-        if (updateDto != null) {
-            Optional.ofNullable(updateDto.getTitle()).ifPresent(protest::setTitle);
-            Optional.ofNullable(updateDto.getDescription()).ifPresent(protest::setDescription);
-            Optional.ofNullable(updateDto.getStartDateTime()).ifPresent(protest::setStartDateTime);
-            Optional.ofNullable(updateDto.getEndDateTime()).ifPresent(protest::setEndDateTime);
-            Optional.ofNullable(updateDto.getDeclaredParticipants())
-                    .ifPresent(protest::setDeclaredParticipants);
-            Optional.ofNullable(updateDto.getStatus()).ifPresent(protest::setStatus);
-        }
     }
 
     public Protest getProtestById(Long id, boolean isWithOrganizer) {
