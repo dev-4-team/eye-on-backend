@@ -1,27 +1,14 @@
 package com.on.eye.api.protest.service;
 
-import static com.on.eye.api.protest.util.GeoUtils.haversineDistance;
-
-import java.time.Duration;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Optional;
-
-import org.springframework.dao.DataIntegrityViolationException;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
 import com.on.eye.api.auth.error.exception.OutOfValidProtestRangeException;
 import com.on.eye.api.cheer.service.CheerSyncService;
 import com.on.eye.api.global.config.security.AnonymousIdGenerator;
 import com.on.eye.api.global.config.security.SecurityUtils;
 import com.on.eye.api.location.dto.LocationDto;
 import com.on.eye.api.location.dto.ProtestLocationDto;
-import com.on.eye.api.location.entity.Location;
-import com.on.eye.api.location.entity.ProtestLocationMapping;
+import com.on.eye.api.location.entity.ProtestLocationMappings;
 import com.on.eye.api.location.service.LocationService;
+import com.on.eye.api.organizer.entity.Organizer;
 import com.on.eye.api.organizer.service.OrganizerService;
 import com.on.eye.api.protest.dto.*;
 import com.on.eye.api.protest.entity.ParticipantsVerification;
@@ -30,14 +17,24 @@ import com.on.eye.api.protest.entity.ProtestVerification;
 import com.on.eye.api.protest.error.exception.AbnormalMovementPatternException;
 import com.on.eye.api.protest.error.exception.DuplicateVerificationException;
 import com.on.eye.api.protest.error.exception.ProtestNotFoundException;
-import com.on.eye.api.protest.mapper.ProtestMapper;
 import com.on.eye.api.protest.repository.ParticipantVerificationRepository;
 import com.on.eye.api.protest.repository.ProtestRepository;
 import com.on.eye.api.protest.repository.ProtestVerificationRepository;
 import com.on.eye.api.protest.util.GeoUtils;
-
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.time.Duration;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
+
+import static com.on.eye.api.protest.util.GeoUtils.haversineDistance;
 
 @Service
 @RequiredArgsConstructor
@@ -56,29 +53,23 @@ public class ProtestService {
     public List<Long> createProtest(List<ProtestCreateRequest> protestCreateRequests) {
         log.info("시위 {}건 생성 요청", protestCreateRequests.size());
 
-        // 생성 시간 기준으로 상태 자동 설정
-        List<ProtestCreateMapping> protestCreateMappings =
-                ProtestMapper.toEntity(protestCreateRequests);
-        log.debug("시위 정보 매핑 {}건 완료", protestCreateMappings.size());
+        List<Protest> protests = new ArrayList<>();
+        for (ProtestCreateRequest request : protestCreateRequests) {
+            Protest protest = Protest.from(request);
 
-        // set locations using locationDto
-        setLocationMappings(protestCreateMappings);
-        log.debug("시위 장소 정보 매핑 완료");
+            // add locations
+            ProtestLocationMappings mappings = locationService.assignLocationMappings(protest, request.locations());
+            protest.addLocationMappings(mappings);
 
-        organizerService.checkOrganizer(protestCreateMappings);
+            // add organizer
+            Organizer organizer = organizerService.getOrCreateOrganizer(request);
+            protest.addOrganizer(organizer);
 
-        // ProtestLocationMapping도 Casacade 설정으로 함께 저장됨
-        List<Protest> protests =
-                protestCreateMappings.stream()
-                        .map(
-                                mapping -> {
-                                    Protest protest = mapping.getProtest();
-                                    ProtestVerification protestVerification =
-                                            new ProtestVerification(protest);
-                                    protest.setProtestVerification(protestVerification);
-                                    return protest;
-                                })
-                        .toList();
+            // add verifications
+            protest.addVerification();
+
+            protests.add(protest);
+        }
 
         List<Long> response =
                 protestRepository.saveAll(protests).stream().map(Protest::getId).toList();
@@ -96,7 +87,7 @@ public class ProtestService {
         Protest protest = getProtestById(id, true);
         log.debug("시위 기본 정보 조회 완료 - 제목: {}", protest.getTitle());
 
-        List<LocationDto> locations = getLocations(protest);
+        List<LocationDto> locations = protest.getLocationMappings().toLocationDtos();
         log.debug("시위 장소 정보 조회 완료 - 총 {}개", locations.size());
 
         log.info("시위 상세 정보 조회 완료 - ID: {}", id);
@@ -116,7 +107,8 @@ public class ProtestService {
                         .stream()
                         .map(
                                 protest -> {
-                                    List<LocationDto> locations = getLocations(protest);
+                                    List<LocationDto> locations =
+                                            protest.getLocationMappings().toLocationDtos();
                                     return ProtestResponse.from(protest, locations);
                                 })
                         .toList();
@@ -164,43 +156,11 @@ public class ProtestService {
         return protestRepository.findById(id).orElseThrow(() -> ProtestNotFoundException.EXCEPTION);
     }
 
-    private void setLocationMappings(List<ProtestCreateMapping> protestCreateMappings) {
-        int sequence = 0;
-        for (ProtestCreateMapping mapping : protestCreateMappings) {
-            Protest protest = mapping.getProtest();
-            ProtestCreateRequest protestCreateRequest = mapping.getProtestCreateRequest();
-            for (LocationDto locationDto : protestCreateRequest.locations()) {
-                // Retrieve or create location
-                Location location = locationService.getOrCreateLocation(locationDto);
-
-                // Create and add mapping
-                createAndAddMapping(protest, location, sequence++);
-            }
-        }
-    }
-
-    private void createAndAddMapping(Protest protest, Location location, int sequence) {
-        ProtestLocationMapping mapping =
-                ProtestLocationMapping.builder()
-                        .protest(protest)
-                        .location(location)
-                        .sequence(sequence)
-                        .build();
-
-        protest.getLocationMappings().add(mapping);
-    }
-
-    private List<LocationDto> getLocations(Protest protest) {
-        return protest.getLocationMappings().stream()
-                .sorted(Comparator.comparing(ProtestLocationMapping::getSequence))
-                .map(mapping -> LocationDto.from(mapping.getLocation()))
-                .toList();
-    }
-
     @Transactional
     public Boolean participateVerify(Long protestId, ParticipateVerificationRequest request) {
         Long userId = SecurityUtils.getCurrentUserId();
         Protest protest = getProtestById(protestId, false);
+        // TODO: ProtestLocationMappings or Locations 등에서 해결 가능
         ProtestLocationDto protestLocationDto = locationService.getProtestCenterLocation(protest);
 
         // 유효 반경 내 인증인지 검증
