@@ -1,5 +1,6 @@
 package com.on.eye.api.protest.entity;
 
+import com.on.eye.api.global.common.model.entity.BaseTimeEntity;
 import com.on.eye.api.location.entity.ProtestLocationMappings;
 import com.on.eye.api.organizer.entity.Organizer;
 import com.on.eye.api.protest.dto.ProtestCreateRequest;
@@ -18,17 +19,12 @@ import java.util.List;
 @Table(name = "protests")
 @Getter
 @NoArgsConstructor
-public class Protest {
+public class Protest extends BaseTimeEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     private String title;
-
-    private String description;
-
-    @Column(nullable = false, updatable = false)
-    private final LocalDateTime createTime = LocalDateTime.now();
 
     @Column(nullable = false)
     private LocalDateTime startDateTime;
@@ -55,23 +51,17 @@ public class Protest {
     private Integer declaredParticipants;
 
     @Column(nullable = false)
-    @Enumerated(EnumType.STRING)
-    private final ProtestStatus status = ProtestStatus.SCHEDULED;
-
-    @Column(nullable = false)
     private Integer radius = 500;
 
     @Builder
     public Protest(
             String title,
-            String description,
             LocalDateTime startDateTime,
             LocalDateTime endDateTime,
             Organizer organizer,
             Integer declaredParticipants,
             Integer radius) {
         this.title = title;
-        this.description = description;
         this.startDateTime = startDateTime;
         this.endDateTime = endDateTime;
         this.organizer = organizer;
