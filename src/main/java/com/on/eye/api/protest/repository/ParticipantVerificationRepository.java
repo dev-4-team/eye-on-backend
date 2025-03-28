@@ -15,7 +15,7 @@ public interface ParticipantVerificationRepository
             """
                     SELECT new com.on.eye.api.protest.dto.VerificationHistory(p.id, l.latitude, l.longitude, pv.verifiedAt)  FROM ParticipantsVerification pv
                                 JOIN pv.protest p
-                                JOIN p.locationMappings plm
+                                JOIN p.locationMappings.mappings plm
                                 JOIN plm.location l
                             WHERE pv.anonymousUserId = :anonUserId and p.startDateTime >= :today
                             ORDER BY pv.verifiedAt DESC

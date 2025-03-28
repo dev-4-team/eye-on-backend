@@ -32,7 +32,7 @@ public interface LocationRepository extends JpaRepository<Location, Long> {
                                 l.longitude
                             )
                             from Protest p
-                            join p.locationMappings lm
+                            join p.locationMappings.mappings lm
                             join lm.location l
                             where p.id = :protestId
                             order by lm.sequence
