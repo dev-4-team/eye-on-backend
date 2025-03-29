@@ -18,7 +18,7 @@ import lombok.extern.slf4j.Slf4j;
 @Service
 @RequiredArgsConstructor
 @Slf4j
-public class CheerCacheService {
+public class CheerCacheService implements CheerService{
 
     private final CheerCacheRepository cheerCacheRepository;
     private final SimpMessagingTemplate simpMessagingTemplate;
@@ -29,6 +29,7 @@ public class CheerCacheService {
      * @param protestId 시위 ID
      * @return 증가 후의 응원 수
      */
+    @Override
     public Integer cheerProtest(Long protestId) {
         // 시위 존재 확인
 
@@ -47,6 +48,7 @@ public class CheerCacheService {
      * @param protestId 시위 ID
      * @return 응원 통계 정보
      */
+    @Override
     public CheerStat getCheerStat(Long protestId) {
         Integer cheerCount = cheerCacheRepository.getCheerCount(protestId);
         return new CheerStat(protestId, cheerCount);
@@ -57,6 +59,7 @@ public class CheerCacheService {
      *
      * @return 모든 시위의 응원 통계 목록
      */
+    @Override
     public List<CheerStat> getAllCheerStats() {
         return cheerCacheRepository.getAllCheerStats();
     }
