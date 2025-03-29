@@ -1,6 +1,8 @@
-package com.on.eye.api.protest.entity;
+package com.on.eye.api.protest_verification.entity;
 
 import jakarta.persistence.*;
+
+import com.on.eye.api.protest.entity.Protest;
 
 import lombok.AccessLevel;
 import lombok.Getter;
