@@ -2,7 +2,9 @@ package com.on.eye.api.organizer.entity;
 
 import jakarta.persistence.*;
 
-import com.on.eye.api.organizer.dto.OrganizerDto;
+import com.on.eye.api.global.common.model.entity.BaseTimeEntity;
+import com.on.eye.api.organizer.dto.OrganizerRequest;
+import com.on.eye.api.organizer.dto.OrganizerResponse;
 
 import lombok.Builder;
 import lombok.Getter;
@@ -14,7 +16,7 @@ import lombok.NoArgsConstructor;
         indexes = {@Index(name = "organizer_name", columnList = "name", unique = true)})
 @NoArgsConstructor
 @Getter
-public class Organizer {
+public class Organizer extends BaseTimeEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -34,7 +36,11 @@ public class Organizer {
         this.title = title;
     }
 
-    public static Organizer from(OrganizerDto dto) {
+    public static Organizer from(OrganizerRequest dto) {
         return new Organizer(dto.name(), null, dto.title());
+    }
+
+    public OrganizerResponse toResponse() {
+        return new OrganizerResponse(this.getName(), this.getTitle(), this.getDescription());
     }
 }
