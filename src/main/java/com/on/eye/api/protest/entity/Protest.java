@@ -1,19 +1,30 @@
 package com.on.eye.api.protest.entity;
 
-import com.on.eye.api.global.common.model.entity.BaseTimeEntity;
-import com.on.eye.api.location.entity.ProtestLocationMappings;
-import com.on.eye.api.organizer.entity.Organizer;
-import com.on.eye.api.protest.dto.ProtestCreateRequest;
-import jakarta.persistence.*;
-import jakarta.validation.constraints.Max;
-import jakarta.validation.constraints.Min;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import static com.on.eye.api.protest.util.GeoUtils.haversineDistance;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+
+import jakarta.persistence.*;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
+
+import com.on.eye.api.auth.error.exception.OutOfValidProtestRangeException;
+import com.on.eye.api.global.common.model.entity.BaseTimeEntity;
+import com.on.eye.api.location.dto.LocationDto;
+import com.on.eye.api.location.entity.ProtestLocationMappings;
+import com.on.eye.api.organizer.dto.OrganizerResponse;
+import com.on.eye.api.organizer.entity.Organizer;
+import com.on.eye.api.participant_verification.entity.ParticipantsVerification;
+import com.on.eye.api.protest.dto.Coordinate;
+import com.on.eye.api.protest.dto.ProtestCreateRequest;
+import com.on.eye.api.protest.dto.ProtestResponse;
+import com.on.eye.api.protest_verification.entity.ProtestVerification;
+
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 @Entity
 @Table(name = "protests")
@@ -32,8 +43,7 @@ public class Protest extends BaseTimeEntity {
     @Column(nullable = false)
     private LocalDateTime endDateTime;
 
-    @Embedded
-    private ProtestLocationMappings locationMappings = new ProtestLocationMappings();
+    @Embedded private ProtestLocationMappings locationMappings = new ProtestLocationMappings();
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "organizer_id", foreignKey = @ForeignKey(ConstraintMode.NO_CONSTRAINT))
@@ -81,6 +91,30 @@ public class Protest extends BaseTimeEntity {
         this.protestVerification = new ProtestVerification(this);
     }
 
+    public void validateUserCoordinateRange(Coordinate userCoordinate) {
+        Coordinate centerCoordinate = this.locationMappings.getCenterCoordinate();
+        double distance = haversineDistance(centerCoordinate, userCoordinate);
+        if (distance > this.radius) throw OutOfValidProtestRangeException.EXCEPTION;
+    }
+
+    public ProtestResponse toResponse() {
+        List<LocationDto> locations = this.getLocationMappings().toLocationDtos();
+        ProtestResponse.ProtestResponseBuilder builder =
+                ProtestResponse.builder()
+                        .id(this.getId())
+                        .title(this.getTitle())
+                        .radius(this.getRadius())
+                        .startDateTime(this.getStartDateTime())
+                        .endDateTime(this.getEndDateTime())
+                        .declaredParticipants(this.getDeclaredParticipants())
+                        .locations(locations);
+        OrganizerResponse organizerResponse = this.getOrganizer().toResponse();
+        if (organizerResponse != null) {
+            builder.organizerResponse(organizerResponse);
+        }
+        return builder.build();
+    }
+
     public static Protest from(ProtestCreateRequest protestCreateRequest) {
         return Protest.builder()
                 .title(protestCreateRequest.title())
@@ -107,8 +141,8 @@ public class Protest extends BaseTimeEntity {
         double radius =
                 MIN_RADIUS
                         + (logParticipants - MIN_PARTICIPANTS)
-                        * (MAX_RADIUS - MIN_RADIUS)
-                        / (MAX_PARTICIPANTS - MIN_PARTICIPANTS);
+                                * (MAX_RADIUS - MIN_RADIUS)
+                                / (MAX_PARTICIPANTS - MIN_PARTICIPANTS);
 
         // 정수로 반올림
         return (int) Math.round(radius);
