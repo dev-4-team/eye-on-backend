@@ -2,6 +2,8 @@ package com.on.eye.api.protest.util;
 
 import java.math.BigDecimal;
 
+import com.on.eye.api.protest.dto.Coordinate;
+
 public class GeoUtils {
 
     // 지구 반경 (미터)
@@ -12,18 +14,15 @@ public class GeoUtils {
     /**
      * Calculates the distance between two geographic coordinates using the Haversine formula.
      *
-     * @param startLatitude The latitude of the starting point
-     * @param startLongitude The longitude of the starting point
-     * @param endLatitude The latitude of the ending point
-     * @param endLongitude The longitude of the ending point
+     * @param start The coordinate of the starting point
+     * @param end The coordinate of the ending point
      * @return Distance between the points in meters
      */
-    public static double haversineDistance(
-            BigDecimal startLatitude,
-            BigDecimal startLongitude,
-            BigDecimal endLatitude,
-            BigDecimal endLongitude) {
-
+    public static double haversineDistance(Coordinate start, Coordinate end) {
+        BigDecimal startLatitude = start.latitude();
+        BigDecimal startLongitude = start.longitude();
+        BigDecimal endLatitude = end.latitude();
+        BigDecimal endLongitude = end.longitude();
         // 위도와 경도 차이를 라디안으로 변환
         double latitudeDiffRadians =
                 Math.toRadians(endLatitude.doubleValue() - startLatitude.doubleValue());
