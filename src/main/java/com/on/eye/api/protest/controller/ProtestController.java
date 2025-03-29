@@ -1,20 +1,23 @@
 package com.on.eye.api.protest.controller;
 
-import com.on.eye.api.protest.dto.ParticipateVerificationRequest;
-import com.on.eye.api.protest.dto.ProtestCreateRequest;
-import com.on.eye.api.protest.dto.ProtestResponse;
-import com.on.eye.api.protest.dto.ProtestVerificationResponse;
-import com.on.eye.api.protest.service.ProtestService;
+import java.time.LocalDate;
+import java.util.List;
+
 import jakarta.validation.Valid;
-import lombok.RequiredArgsConstructor;
+
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
-import java.time.LocalDate;
-import java.util.List;
+import com.on.eye.api.protest.dto.Coordinate;
+import com.on.eye.api.protest.dto.ProtestCreateRequest;
+import com.on.eye.api.protest.dto.ProtestResponse;
+import com.on.eye.api.protest.service.ProtestService;
+import com.on.eye.api.protest_verification.dto.ProtestVerificationResponse;
+
+import lombok.RequiredArgsConstructor;
 
 @RestController
 @RequestMapping("/protest")
@@ -25,7 +28,7 @@ public class ProtestController {
 
     @PostMapping("{id}/participate/verify")
     public ResponseEntity<Boolean> participateVerify(
-            @PathVariable Long id, @Valid @RequestBody ParticipateVerificationRequest request) {
+            @PathVariable Long id, @Valid @RequestBody Coordinate request) {
         // 냅다 ok가 아니라, 성공이면 ok, 실패면 success = false. 거리가 멀다 이런 식의 메세지가 나갔으면 함. 실패 사유가 나갔으면.
         return ResponseEntity.ok(protestService.participateVerify(id, request));
     }
@@ -50,7 +53,7 @@ public class ProtestController {
     public ResponseEntity<List<ProtestVerificationResponse>> getVerificationsNum(
             @RequestParam(required = false) Long protestId,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
-            LocalDate date) {
+                    LocalDate date) {
         if (date == null) date = LocalDate.now();
         List<ProtestVerificationResponse> response =
                 protestService.getProtestVerifications(protestId, date);
@@ -60,7 +63,7 @@ public class ProtestController {
     @GetMapping
     public ResponseEntity<List<ProtestResponse>> getProtestsBy(
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
-            LocalDate date) {
+                    LocalDate date) {
         if (date == null) {
             date = LocalDate.now();
         }
