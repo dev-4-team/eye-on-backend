@@ -1,22 +1,23 @@
 package com.on.eye.api.protest.dto;
 
-import com.on.eye.api.location.dto.LocationDto;
-import com.on.eye.api.organizer.entity.Organizer;
-import com.on.eye.api.protest.entity.Protest;
-import lombok.Builder;
-import lombok.Getter;
-
 import java.time.LocalDateTime;
 import java.util.List;
+
+import com.on.eye.api.location.dto.LocationDto;
+import com.on.eye.api.organizer.dto.OrganizerResponse;
+import com.on.eye.api.protest.entity.Protest;
+
+import lombok.Builder;
+import lombok.Getter;
 
 @Getter
 public class ProtestResponse {
     private final Long id;
-    private final String title;
-    private final String description;
+    private String title;
+    private String description;
+    private String organizer;
     private final LocalDateTime startDateTime;
     private final LocalDateTime endDateTime;
-    private final String organizer;
     private final Integer declaredParticipants;
 
     private final List<LocationDto> locations;
@@ -26,19 +27,21 @@ public class ProtestResponse {
     public ProtestResponse(
             Long id,
             String title,
-            String description,
+            OrganizerResponse organizerResponse,
             LocalDateTime startDateTime,
             LocalDateTime endDateTime,
-            String organizer,
             Integer declaredParticipants,
             List<LocationDto> locations,
             Integer radius) {
         this.id = id;
         this.title = title;
-        this.description = description;
+        if (organizerResponse != null) {
+            this.title = organizerResponse.title();
+            this.description = organizerResponse.description();
+            this.organizer = organizerResponse.name();
+        }
         this.startDateTime = startDateTime;
         this.endDateTime = endDateTime;
-        this.organizer = organizer;
         this.declaredParticipants = declaredParticipants;
         this.locations = locations;
         this.radius = radius;
@@ -54,11 +57,9 @@ public class ProtestResponse {
                         .endDateTime(protest.getEndDateTime())
                         .declaredParticipants(protest.getDeclaredParticipants())
                         .locations(locations);
-        Organizer organizer = protest.getOrganizer();
+        OrganizerResponse organizer = protest.getOrganizer().toResponse();
         if (organizer != null) {
-            builder.organizer(organizer.getName())
-                    .description(organizer.getDescription())
-                    .title(organizer.getTitle());
+            builder.organizerResponse(organizer);
         }
         return builder.build();
     }

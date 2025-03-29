@@ -1,12 +1,14 @@
 package com.on.eye.api.organizer.service;
 
-import com.on.eye.api.organizer.dto.OrganizerDto;
+import org.springframework.stereotype.Service;
+
+import com.on.eye.api.organizer.dto.OrganizerRequest;
 import com.on.eye.api.organizer.entity.Organizer;
 import com.on.eye.api.organizer.repository.OrganizerRepository;
 import com.on.eye.api.protest.dto.ProtestCreateRequest;
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Service;
 
 @Service
 @RequiredArgsConstructor
@@ -16,13 +18,14 @@ public class OrganizerService {
     private static final double SIMILARITY_THRESHOLD = 0.35;
 
     public Organizer getOrCreateOrganizer(ProtestCreateRequest request) {
-        OrganizerDto organizerDto = new OrganizerDto(request.organizer(), request.title());
-        return getOrCreateOrganizer(organizerDto);
+        OrganizerRequest organizerRequest =
+                new OrganizerRequest(request.organizer(), request.title());
+        return getOrCreateOrganizer(organizerRequest);
     }
 
-    private Organizer getOrCreateOrganizer(OrganizerDto organizerDto) {
+    private Organizer getOrCreateOrganizer(OrganizerRequest organizerRequest) {
         return organizerRepository
-                .findBySimilarOrganizer(organizerDto.name(), SIMILARITY_THRESHOLD)
-                .orElseGet(() -> organizerRepository.save(Organizer.from(organizerDto)));
+                .findBySimilarOrganizer(organizerRequest.name(), SIMILARITY_THRESHOLD)
+                .orElseGet(() -> organizerRepository.save(Organizer.from(organizerRequest)));
     }
 }
