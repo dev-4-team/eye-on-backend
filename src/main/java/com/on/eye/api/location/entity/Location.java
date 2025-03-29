@@ -5,6 +5,7 @@ import java.math.BigDecimal;
 import jakarta.persistence.*;
 
 import com.on.eye.api.location.dto.LocationDto;
+import com.on.eye.api.protest.dto.Coordinate;
 
 import lombok.AccessLevel;
 import lombok.Builder;
@@ -36,6 +37,10 @@ public class Location {
         this.name = name;
         this.latitude = latitude;
         this.longitude = longitude;
+    }
+
+    public Coordinate toCoordinate() {
+        return new Coordinate(this.latitude, this.longitude);
     }
 
     public LocationDto toDto() {
