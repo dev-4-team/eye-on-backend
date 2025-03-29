@@ -46,7 +46,6 @@ services:
       - prometheus
     networks:
       - monitoring
-    command: run /scripts/simple-test.js
 
 networks:
   monitoring:
