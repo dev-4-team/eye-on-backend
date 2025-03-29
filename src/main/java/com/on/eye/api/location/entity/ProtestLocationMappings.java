@@ -1,18 +1,23 @@
 package com.on.eye.api.location.entity;
 
-import com.on.eye.api.location.dto.LocationDto;
-import com.on.eye.api.protest.entity.Protest;
-import jakarta.persistence.CascadeType;
-import jakarta.persistence.Embeddable;
-import jakarta.persistence.OneToMany;
-import jakarta.persistence.OrderBy;
-import lombok.NoArgsConstructor;
-import org.springframework.lang.NonNull;
-
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
+
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.Embeddable;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.OrderBy;
+
+import org.springframework.lang.NonNull;
+
+import com.on.eye.api.location.dto.LocationDto;
+import com.on.eye.api.location.error.exception.LocationNotFoundException;
+import com.on.eye.api.protest.dto.Coordinate;
+import com.on.eye.api.protest.entity.Protest;
+
+import lombok.NoArgsConstructor;
 
 @Embeddable
 @NoArgsConstructor
@@ -23,6 +28,13 @@ public class ProtestLocationMappings implements Iterable<ProtestLocationMapping>
 
     public ProtestLocationMappings(Protest protest, Locations locations) {
         this.add(protest, locations);
+    }
+
+    public Coordinate getCenterCoordinate() {
+        if (mappings.isEmpty() || mappings.get(0).getLocation() == null) {
+            throw LocationNotFoundException.EXCEPTION;
+        }
+        return mappings.get(0).getLocation().toCoordinate();
     }
 
     private void add(Protest protest, Locations locations) {
