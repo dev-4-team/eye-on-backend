@@ -1,8 +1,10 @@
-package com.on.eye.api.protest.entity;
+package com.on.eye.api.participant_verification.entity;
 
 import java.time.LocalDateTime;
 
 import jakarta.persistence.*;
+
+import com.on.eye.api.protest.entity.Protest;
 
 import lombok.AccessLevel;
 import lombok.Builder;
