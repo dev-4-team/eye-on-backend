@@ -1,5 +1,9 @@
 package com.on.eye.api.location.service;
 
+import java.util.List;
+
+import org.springframework.stereotype.Service;
+
 import com.on.eye.api.location.dto.LocationDto;
 import com.on.eye.api.location.dto.ProtestLocationDto;
 import com.on.eye.api.location.entity.Location;
@@ -8,11 +12,9 @@ import com.on.eye.api.location.entity.ProtestLocationMappings;
 import com.on.eye.api.location.error.exception.LocationNotFoundException;
 import com.on.eye.api.location.repository.LocationRepository;
 import com.on.eye.api.protest.entity.Protest;
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Service;
-
-import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -21,7 +23,8 @@ public class LocationService {
     private final LocationRepository locationRepository;
     private static final double SIMILARITY_THRESHOLD = 0.35;
 
-    public ProtestLocationMappings assignLocationMappings(Protest protest, List<LocationDto> locationDtos) {
+    public ProtestLocationMappings assignLocationMappings(
+            Protest protest, List<LocationDto> locationDtos) {
         Locations locations = getLocations(locationDtos);
         return new ProtestLocationMappings(protest, locations);
     }
