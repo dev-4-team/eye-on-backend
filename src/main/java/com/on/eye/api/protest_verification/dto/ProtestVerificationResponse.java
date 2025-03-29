@@ -1,6 +1,6 @@
-package com.on.eye.api.protest.dto;
+package com.on.eye.api.protest_verification.dto;
 
-import com.on.eye.api.protest.entity.ProtestVerification;
+import com.on.eye.api.protest_verification.entity.ProtestVerification;
 
 public record ProtestVerificationResponse(Long protestId, int verifiedNum) {
 

@@ -1,10 +1,10 @@
-package com.on.eye.api.protest.repository;
+package com.on.eye.api.protest_verification.repository;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 
-import com.on.eye.api.protest.entity.ProtestVerification;
+import com.on.eye.api.protest_verification.entity.ProtestVerification;
 
 public interface ProtestVerificationRepository extends JpaRepository<ProtestVerification, Long> {
     @Modifying
