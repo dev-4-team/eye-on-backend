@@ -25,19 +25,23 @@ public class CheerDbService implements CheerService{
     public Integer cheerProtest(Long protestId) {
         Optional<ProtestCheerCount> optionalCheerCount = protestCheerCountRepository.findByProtestId(protestId);
 
-        Integer newCount = 1;
-        if(optionalCheerCount.isPresent()) {
-            newCount = optionalCheerCount.get().getCheerCount() + 1;
+        if (optionalCheerCount.isPresent()) {
+            protestCheerCountRepository.incrementCheerCount(protestId);
+            Integer newCount = protestCheerCountRepository.findByProtestId(protestId)
+                    .map(ProtestCheerCount::getCheerCount)
+                    .orElse(1);
+
+            log.debug("시위 ID: {} 응원 성공 - 현재 응원 수: {}", protestId, newCount);
+            return newCount;
         }
 
-        ProtestCheerCount cheerCount = ProtestCheerCount.builder()
+        ProtestCheerCount newCheerCount = ProtestCheerCount.builder()
                 .protestId(protestId)
-                .cheerCount(newCount)
+                .cheerCount(1)
                 .build();
-
-        protestCheerCountRepository.save(cheerCount);
-        log.debug("시위 ID: {} 응원 성공 - 현재 응원 수: {}", protestId, newCount);
-        return newCount;
+        protestCheerCountRepository.save(newCheerCount);
+        log.debug("시위 ID: {} 첫 응원 등록 - 현재 응원 수: 1", protestId);
+        return 1;
     }
 
     @Override
