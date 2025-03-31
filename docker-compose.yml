@@ -16,6 +16,7 @@ services:
       timeout: 30s
       retries: 3
       start_period: 5s
+    network_mode: "host"
     networks:
       - monitoring
 
