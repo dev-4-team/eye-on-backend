@@ -10,6 +10,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import com.on.eye.api.cheer.entity.ProtestCheerCount;
+import org.springframework.transaction.annotation.Transactional;
 
 public interface ProtestCheerCountRepository extends JpaRepository<ProtestCheerCount, Long> {
     Optional<ProtestCheerCount> findByProtestId(Long protestId);
@@ -23,6 +24,7 @@ public interface ProtestCheerCountRepository extends JpaRepository<ProtestCheerC
             @Param("startDateTime") LocalDateTime startDateTime);
 
     @Modifying
+    @Transactional
     @Query("UPDATE ProtestCheerCount pc SET pc.cheerCount = pc.cheerCount + 1 WHERE pc.protestId = :protestId")
     Integer incrementCheerCount(@Param("protestId") Long protestId);
 }

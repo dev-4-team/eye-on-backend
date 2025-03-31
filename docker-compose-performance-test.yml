@@ -1,3 +1,4 @@
+version: '3.8'
 services:
   app:
     env_file:
@@ -23,6 +24,7 @@ services:
   prometheus:
     image: prom/prometheus:v2.43.0
     container_name: prometheus
+    restart: unless-stopped
     ports:
       - "9090:9090"
     volumes:
@@ -41,6 +43,7 @@ services:
   grafana:
     image: grafana/grafana:9.5.2
     container_name: grafana
+    restart: unless-stopped
     ports:
       - "4000:3000"
     volumes:
@@ -56,6 +59,7 @@ services:
   k6:
     image: grafana/k6:0.47.0
     container_name: k6
+    restart: unless-stopped
     ports:
       - "6565:6565"
     environment:
