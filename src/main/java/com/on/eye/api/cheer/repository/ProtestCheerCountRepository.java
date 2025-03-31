@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
@@ -20,4 +21,8 @@ public interface ProtestCheerCountRepository extends JpaRepository<ProtestCheerC
             "SELECT pc FROM ProtestCheerCount pc WHERE pc.protestId IN (SELECT p.id FROM Protest p WHERE p.startDateTime >= :startDateTime)")
     List<ProtestCheerCount> findAllByProtestStartDateTime(
             @Param("startDateTime") LocalDateTime startDateTime);
+
+    @Modifying
+    @Query("UPDATE ProtestCheerCount pc SET pc.cheerCount = pc.cheerCount + 1 WHERE pc.protestId = :protestId")
+    Integer incrementCheerCount(@Param("protestId") Long protestId);
 }
