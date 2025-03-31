@@ -1,11 +1,5 @@
 package com.on.eye.api.protest.service;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
 import com.on.eye.api.cheer.service.CheerSyncService;
 import com.on.eye.api.location.entity.ProtestLocationMappings;
 import com.on.eye.api.location.service.LocationService;
@@ -16,9 +10,13 @@ import com.on.eye.api.protest.dto.Coordinate;
 import com.on.eye.api.protest.dto.ProtestCreateRequest;
 import com.on.eye.api.protest.entity.Protest;
 import com.on.eye.api.protest_verification.service.ProtestVerificationService;
-
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -35,24 +33,7 @@ public class ProtestFacade {
     public List<Long> createProtest(List<ProtestCreateRequest> protestCreateRequests) {
         log.info("시위 {}건 생성 요청", protestCreateRequests.size());
 
-        List<Protest> protests = new ArrayList<>();
-        for (ProtestCreateRequest request : protestCreateRequests) {
-            Protest protest = Protest.from(request);
-
-            // add locations
-            ProtestLocationMappings mappings =
-                    locationService.assignLocationMappings(protest, request.locations());
-            protest.addLocationMappings(mappings);
-
-            // add organizer
-            Organizer organizer = organizerService.getOrCreateOrganizer(request);
-            protest.addOrganizer(organizer);
-
-            // add verifications
-            protest.addVerification();
-
-            protests.add(protest);
-        }
+        List<Protest> protests = buildProtestsFromRequests(protestCreateRequests);
 
         List<Long> response = protestService.saveAllProtests(protests);
 
@@ -60,6 +41,33 @@ public class ProtestFacade {
 
         log.info("시위 {}건 생성 완료. 생성된 ID: {}", protests.size(), response);
         return response;
+    }
+
+    private List<Protest> buildProtestsFromRequests(List<ProtestCreateRequest> protestCreateRequests) {
+        List<Protest> protests = new ArrayList<>();
+
+        for (ProtestCreateRequest request : protestCreateRequests) {
+            Protest protest = Protest.from(request);
+
+            assignProtestLocations(protest, request);
+            assignProtestOrganizer(protest, request);
+            protest.addVerification();
+
+            protests.add(protest);
+        }
+
+        return protests;
+    }
+
+    private void assignProtestLocations(Protest protest, ProtestCreateRequest request) {
+        ProtestLocationMappings mappings =
+                locationService.assignLocationMappings(protest, request.locations());
+        protest.addLocationMappings(mappings);
+    }
+    
+    private void assignProtestOrganizer(Protest protest, ProtestCreateRequest request) {
+        Organizer organizer = organizerService.getOrCreateOrganizer(request);
+        protest.addOrganizer(organizer);
     }
 
     @Transactional
