@@ -8,59 +8,32 @@ import com.on.eye.api.organizer.dto.OrganizerResponse;
 import com.on.eye.api.protest.entity.Protest;
 
 import lombok.Builder;
-import lombok.Getter;
 
-@Getter
-public class ProtestResponse {
-    private final Long id;
-    private String title;
-    private String description;
-    private String organizer;
-    private final LocalDateTime startDateTime;
-    private final LocalDateTime endDateTime;
-    private final Integer declaredParticipants;
-
-    private final List<LocationDto> locations;
-    private final Integer radius;
-
-    @Builder
-    public ProtestResponse(
-            Long id,
-            String title,
-            OrganizerResponse organizerResponse,
-            LocalDateTime startDateTime,
-            LocalDateTime endDateTime,
-            Integer declaredParticipants,
-            List<LocationDto> locations,
-            Integer radius) {
-        this.id = id;
-        this.title = title;
-        if (organizerResponse != null) {
-            this.title = organizerResponse.title();
-            this.description = organizerResponse.description();
-            this.organizer = organizerResponse.name();
-        }
-        this.startDateTime = startDateTime;
-        this.endDateTime = endDateTime;
-        this.declaredParticipants = declaredParticipants;
-        this.locations = locations;
-        this.radius = radius;
-    }
-
+@Builder
+public record ProtestResponse(
+        Long id,
+        String title,
+        String description,
+        String organizer,
+        LocalDateTime startDateTime,
+        LocalDateTime endDateTime,
+        Integer declaredParticipants,
+        List<LocationDto> locations,
+        Integer radius) {
+    // 정적 팩토리 메서드에서 빌더 사용
     public static ProtestResponse from(Protest protest, List<LocationDto> locations) {
-        ProtestResponseBuilder builder =
-                ProtestResponse.builder()
-                        .id(protest.getId())
-                        .title(protest.getTitle())
-                        .radius(protest.getRadius())
-                        .startDateTime(protest.getStartDateTime())
-                        .endDateTime(protest.getEndDateTime())
-                        .declaredParticipants(protest.getDeclaredParticipants())
-                        .locations(locations);
         OrganizerResponse organizer = protest.getOrganizer().toResponse();
-        if (organizer != null) {
-            builder.organizerResponse(organizer);
-        }
-        return builder.build();
+
+        return ProtestResponse.builder()
+                .id(protest.getId())
+                .title(organizer != null ? organizer.title() : protest.getTitle())
+                .description(organizer != null ? organizer.description() : null)
+                .organizer(organizer != null ? organizer.name() : null)
+                .startDateTime(protest.getStartDateTime())
+                .endDateTime(protest.getEndDateTime())
+                .declaredParticipants(protest.getDeclaredParticipants())
+                .locations(locations)
+                .radius(protest.getRadius())
+                .build();
     }
 }

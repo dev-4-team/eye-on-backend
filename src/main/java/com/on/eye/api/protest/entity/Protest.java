@@ -14,7 +14,6 @@ import com.on.eye.api.auth.error.exception.OutOfValidProtestRangeException;
 import com.on.eye.api.global.common.model.entity.BaseTimeEntity;
 import com.on.eye.api.location.dto.LocationDto;
 import com.on.eye.api.location.entity.ProtestLocationMappings;
-import com.on.eye.api.organizer.dto.OrganizerResponse;
 import com.on.eye.api.organizer.entity.Organizer;
 import com.on.eye.api.participant_verification.entity.ParticipantsVerification;
 import com.on.eye.api.protest.dto.Coordinate;
@@ -99,20 +98,7 @@ public class Protest extends BaseTimeEntity {
 
     public ProtestResponse toResponse() {
         List<LocationDto> locations = this.getLocationMappings().toLocationDtos();
-        ProtestResponse.ProtestResponseBuilder builder =
-                ProtestResponse.builder()
-                        .id(this.getId())
-                        .title(this.getTitle())
-                        .radius(this.getRadius())
-                        .startDateTime(this.getStartDateTime())
-                        .endDateTime(this.getEndDateTime())
-                        .declaredParticipants(this.getDeclaredParticipants())
-                        .locations(locations);
-        OrganizerResponse organizerResponse = this.getOrganizer().toResponse();
-        if (organizerResponse != null) {
-            builder.organizerResponse(organizerResponse);
-        }
-        return builder.build();
+        return ProtestResponse.from(this, locations);
     }
 
     public static Protest from(ProtestCreateRequest protestCreateRequest) {
