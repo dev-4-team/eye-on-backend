@@ -10,6 +10,8 @@ services:
     restart: always
     volumes:
       - /var/log/eye-on:/app/logs
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     healthcheck:
       test: [ "CMD", "curl", "-f", "http://localhost:8080/actuator/health" ]
       interval: 30s
