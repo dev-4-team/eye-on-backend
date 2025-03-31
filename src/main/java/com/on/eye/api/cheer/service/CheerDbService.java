@@ -26,10 +26,7 @@ public class CheerDbService implements CheerService{
         Optional<ProtestCheerCount> optionalCheerCount = protestCheerCountRepository.findByProtestId(protestId);
 
         if (optionalCheerCount.isPresent()) {
-            protestCheerCountRepository.incrementCheerCount(protestId);
-            Integer newCount = protestCheerCountRepository.findByProtestId(protestId)
-                    .map(ProtestCheerCount::getCheerCount)
-                    .orElse(1);
+            Integer newCount = protestCheerCountRepository.incrementCheerCount(protestId);
 
             log.debug("시위 ID: {} 응원 성공 - 현재 응원 수: {}", protestId, newCount);
             return newCount;
@@ -47,13 +44,9 @@ public class CheerDbService implements CheerService{
     @Override
     @Transactional(readOnly = true)
     public CheerStat getCheerStat(Long protestId) {
-        Optional<ProtestCheerCount> optionalCheerCount = protestCheerCountRepository.findByProtestId(protestId);
-
-        Integer cheerCount = 0;
-        if(optionalCheerCount.isPresent()) {
-            ProtestCheerCount protestCheerCount = optionalCheerCount.get();
-            cheerCount = protestCheerCount.getCheerCount();
-        }
+        Integer cheerCount = protestCheerCountRepository.findByProtestId(protestId)
+                .map(ProtestCheerCount::getCheerCount)
+                .orElse(0);
 
         log.debug("시위 ID: {} 응원 수 조회 - 카운트: {}", protestId, cheerCount);
         return new CheerStat(protestId, cheerCount);
@@ -67,6 +60,6 @@ public class CheerDbService implements CheerService{
         log.debug("모든 시위 응원 수 조회 - 총 {}개 시위", allCheerCounts.size());
         return allCheerCounts.stream()
                 .map(cheerCount -> new CheerStat(cheerCount.getProtestId(), cheerCount.getCheerCount()))
-                .collect(Collectors.toList());
+                .toList();
     }
 }
