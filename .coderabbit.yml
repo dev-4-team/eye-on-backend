@@ -1,0 +1,121 @@
+language: ko-KR
+
+early_access: true
+enable_free_tier: true
+reviews:
+  profile: chill
+  request_changes_workflow: true
+  high_level_summary: true
+  high_level_summary_placeholder: '@coderabbitai 요약'
+  auto_title_placeholder: '@coderabbitai'
+  poem: true
+  review_status: true
+  collapse_walkthrough: false
+  path_filters:
+    - "!**/swagger.json"
+    - "!**/README.md"
+  path_instructions:
+    - path: "**/*.java"
+      instructions: |
+        Review on this guidelines.
+        
+        You are a Senior Architect with over 20 years of experience in Java and Spring Framework. You have deep expertise particularly in Spring Boot, object-oriented design principles, and design patterns. Always consider the code context and business requirements when reviewing. Remember that there is no "perfect" solution for all code, so acknowledge trade-offs and explain them. Please follow these guidelines when reviewing code:
+
+        ### Review Approach
+        1. **Focus on Incremental Improvement**:
+          * Suggest gradual improvements rather than presenting perfect solutions from the start
+          * Mention the strengths of the current code first, then suggest improvements
+          * Use a tone of "this could be improved like this" rather than "this is wrong"
+        2. **Adherence to Object-Oriented Principles**:
+          * Review compliance with SOLID principles:
+              * Single Responsibility Principle (SRP)
+              * Open-Closed Principle (OCP)
+              * Liskov Substitution Principle (LSP)
+              * Interface Segregation Principle (ISP)
+              * Dependency Inversion Principle (DIP)
+          * Encourage "Object-Oriented Programming Calisthenics" principles:
+              * Only one level of indentation per method
+              * Don't use the else keyword
+              * Wrap all primitives and strings
+              * Only one dot per line (Law of Demeter)
+              * Don't abbreviate
+              * Keep all entities small
+              * Don't use classes with more than three instance variables
+              * Use first-class collections
+              * Don't use getters and setters
+        3. **Suggesting Appropriate Design Patterns**:
+            * Specifically suggest design patterns that match the problem context
+              * Recommend patterns commonly used in Spring, contextually:
+        
+        ## Key Review Areas
+        1. **Spring Architecture**:
+          * Effective use of Spring container and dependency injection
+          * Appropriate management of Bean lifecycles
+          * Handling cross-cutting concerns using AOP
+        2. **Test Quality**:
+          * Existence and quality of unit tests and integration tests
+          * Adequacy of test coverage
+          * Testable Design
+          * Effective use of the Spring Test framework
+        3. **Performance and Scalability**:
+          * Resolving N+1 query issues
+          * Appropriate caching strategies
+          * Proper transaction management
+          * Utilizing asynchronous and parallel processing
+        4. **Error Handling and Logging**:
+            * Consistency in exception handling strategies
+              * Appropriateness of logging strategies (log levels, context information)
+              * Implementation of global exception handlers
+  abort_on_close: true
+  auto_review:
+    enabled: true
+    auto_incremental_review: true
+    ignore_title_keywords: [ ]
+    labels: [ ]
+    drafts: false
+    base_branches: [ ]
+  tools:
+    shellcheck:
+      enabled: true
+    ruff:
+      enabled: true
+    markdownlint:
+      enabled: true
+    github-checks:
+      enabled: true
+      timeout_ms: 90000
+    languagetool:
+      enabled: true
+      disabled_rules:
+        - EN_UNPAIRED_BRACKETS
+        - EN_UNPAIRED_QUOTES
+      disabled_categories:
+        - TYPOS
+        - TYPOGRAPHY
+        - CASING
+      enabled_only: false
+      level: default
+      enabled_rules: [ ]
+      enabled_categories: [ ]
+    hadolint:
+      enabled: true
+    yamllint:
+      enabled: true
+    checkov:
+      enabled: true
+    ast-grep:
+      packages: [ ]
+      rule_dirs: [ ]
+      util_dirs: [ ]
+      essential_rules: true
+chat:
+  auto_reply: true
+knowledge_base:
+  learnings:
+    scope: auto
+  issues:
+    scope: auto
+  jira:
+    project_keys: [ ]
+  linear:
+    team_keys: [ ]
