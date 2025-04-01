@@ -37,10 +37,10 @@ public class Organizer extends BaseTimeEntity {
     }
 
     public static Organizer from(OrganizerRequest dto) {
-        return new Organizer(dto.name(), null, dto.title());
+        return new Organizer(dto.name(), "", dto.title());
     }
 
     public OrganizerResponse toResponse() {
-        return new OrganizerResponse(this.getName(), this.getTitle(), this.getDescription());
+        return new OrganizerResponse(this.name, this.title, this.description);
     }
 }
