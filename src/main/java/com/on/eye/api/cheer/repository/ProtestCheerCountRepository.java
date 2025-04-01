@@ -24,7 +24,6 @@ public interface ProtestCheerCountRepository extends JpaRepository<ProtestCheerC
             @Param("startDateTime") LocalDateTime startDateTime);
 
     @Modifying
-    @Transactional
     @Query("UPDATE ProtestCheerCount pc SET pc.cheerCount = pc.cheerCount + 1 WHERE pc.protestId = :protestId")
     Integer incrementCheerCount(@Param("protestId") Long protestId);
 }
