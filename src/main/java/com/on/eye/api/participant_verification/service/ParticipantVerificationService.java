@@ -1,5 +1,11 @@
 package com.on.eye.api.participant_verification.service;
 
+import java.util.Optional;
+
+import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 import com.on.eye.api.global.common.util.LocalDateTimeUtils;
 import com.on.eye.api.global.config.security.AnonymousIdGenerator;
 import com.on.eye.api.global.config.security.SecurityUtils;
@@ -9,12 +15,8 @@ import com.on.eye.api.participant_verification.repository.ParticipantVerificatio
 import com.on.eye.api.protest.dto.Coordinate;
 import com.on.eye.api.protest.entity.Protest;
 import com.on.eye.api.protest.error.exception.DuplicateVerificationException;
-import lombok.RequiredArgsConstructor;
-import org.springframework.dao.DataIntegrityViolationException;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Optional;
+import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
