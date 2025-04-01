@@ -1,5 +1,11 @@
 package com.on.eye.api.protest.service;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 import com.on.eye.api.cheer.service.CheerSyncService;
 import com.on.eye.api.location.entity.ProtestLocationMappings;
 import com.on.eye.api.location.service.LocationService;
@@ -10,13 +16,9 @@ import com.on.eye.api.protest.dto.Coordinate;
 import com.on.eye.api.protest.dto.ProtestCreateRequest;
 import com.on.eye.api.protest.entity.Protest;
 import com.on.eye.api.protest_verification.service.ProtestVerificationService;
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
-import java.util.ArrayList;
-import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -43,7 +45,8 @@ public class ProtestFacade {
         return response;
     }
 
-    private List<Protest> buildProtestsFromRequests(List<ProtestCreateRequest> protestCreateRequests) {
+    private List<Protest> buildProtestsFromRequests(
+            List<ProtestCreateRequest> protestCreateRequests) {
         List<Protest> protests = new ArrayList<>();
 
         for (ProtestCreateRequest request : protestCreateRequests) {
@@ -64,7 +67,7 @@ public class ProtestFacade {
                 locationService.assignLocationMappings(protest, request.locations());
         protest.addLocationMappings(mappings);
     }
-    
+
     private void assignProtestOrganizer(Protest protest, ProtestCreateRequest request) {
         Organizer organizer = organizerService.getOrCreateOrganizer(request);
         protest.addOrganizer(organizer);
