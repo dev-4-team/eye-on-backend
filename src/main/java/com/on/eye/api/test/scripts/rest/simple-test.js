@@ -1,7 +1,6 @@
 import http from 'k6/http';
-import { sleep, check } from 'k6';
+import { check } from 'k6';
 import { Counter, Trend } from 'k6/metrics';
-import { randomIntBetween } from 'https://jslib.k6.io/k6-utils/1.2.0/index.js';
 
 // 테스트 설정 변수
 const CONFIG = {
