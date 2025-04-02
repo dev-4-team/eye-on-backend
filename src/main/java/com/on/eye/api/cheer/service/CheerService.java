@@ -1,8 +1,8 @@
 package com.on.eye.api.cheer.service;
 
-import com.on.eye.api.cheer.dto.CheerStat;
-
 import java.util.List;
+
+import com.on.eye.api.cheer.dto.CheerStat;
 
 public interface CheerService {
     /**

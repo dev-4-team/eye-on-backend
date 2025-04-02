@@ -3,13 +3,19 @@ services:
   app:
     env_file:
       - .env
-    image: ${DOCKER_HUB_USR}/${APP_NAME}:${IMAGE_TAG}
+    build: .
     container_name: ${CONTAINER_NAME}
     ports:
       - "8081:8080"
     restart: always
     volumes:
       - /var/log/eye-on:/app/logs
+    deploy:
+      resources:
+        limits:
+          cpus: '2'
+          memory: 2G
+    mem_swappiness: 0
     extra_hosts:
       - "host.docker.internal:host-gateway"
     healthcheck:
@@ -28,7 +34,7 @@ services:
     ports:
       - "9090:9090"
     volumes:
-      - ./prometheus.yml:/etc/prometheus/prometheus.yml
+      - ./config/prometheus.yml:/etc/prometheus/prometheus.yml
       - prometheus-data:/prometheus
     command:
       - --config.file=/etc/prometheus/prometheus.yml
@@ -49,8 +55,8 @@ services:
     volumes:
       - grafana-storage:/var/lib/grafana
     environment:
-      - GF_SECURITY_ADMIN_USER=admin
-      - GF_SECURITY_ADMIN_PASSWORD=admin
+      - GF_SECURITY_ADMIN_USER=${GRAFANA_ADMIN_USER}
+      - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_ADMIN_PASSWORD}
     depends_on:
       - prometheus
     networks:
@@ -59,12 +65,13 @@ services:
   k6:
     image: grafana/k6:0.47.0
     container_name: k6
-    restart: unless-stopped
     ports:
       - "6565:6565"
     environment:
       - K6_PROMETHEUS_RW_SERVER_URL=http://prometheus:9090/api/v1/write
       - K6_OUT=experimental-prometheus-rw
+      - API_HOST=${API_HOST}
+      - API_PORT=${API_PORT}
     volumes:
       - ./src/main/java/com/on/eye/api/test/scripts:/scripts
     depends_on:
@@ -74,8 +81,8 @@ services:
 
 networks:
   monitoring:
-    external: true
 
 volumes:
+  postgres-data:
   prometheus-data:
   grafana-storage:

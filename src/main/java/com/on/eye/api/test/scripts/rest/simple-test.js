@@ -4,11 +4,12 @@ import { Counter, Trend } from 'k6/metrics';
 
 // 테스트 설정 변수
 const CONFIG = {
-    BASE_URL: 'http://210.113.121.71:8081',
+    BASE_URL: `http://${__ENV.API_HOST}:${__ENV.API_PORT}`,
     PROTEST_IDS: [1, 2, 3, 4, 5],
     POLLING_INTERVAL: 3000,
 
-    // 테스트 단계 설정
+// 테스트 단계 설정
+
     STAGES: [
         { duration: '10s', target: 50 },    // 10초 동안 50명으로 증가
         { duration: '10s', target: 100 },   // 10초 동안 100명으로 증가
