@@ -18,7 +18,7 @@ import lombok.extern.slf4j.Slf4j;
 @Service
 @RequiredArgsConstructor
 @Slf4j
-public class CheerCacheService implements CheerService{
+public class CheerCacheService implements CheerService {
 
     private final CheerCacheRepository cheerCacheRepository;
     private final SimpMessagingTemplate simpMessagingTemplate;
