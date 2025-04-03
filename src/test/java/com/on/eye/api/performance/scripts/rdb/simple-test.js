@@ -5,7 +5,7 @@ import { Counter, Trend } from 'k6/metrics';
 // 테스트 설정 변수
 const CONFIG = {
     BASE_URL: `http://${__ENV.API_HOST}:${__ENV.API_PORT}`,
-    PROTEST_IDS: [1, 2, 3, 4, 5],
+    PROTEST_IDS: [1, 2, 3, 4],
     POLLING_INTERVAL: 3000,
 
 // 테스트 단계 설정
@@ -45,7 +45,7 @@ export default function() {
     const protestId = CONFIG.PROTEST_IDS[Math.floor(Math.random() * CONFIG.PROTEST_IDS.length)];
 
     // 1. POST 요청으로 응원하기
-    let cheerRes = http.post(`${CONFIG.BASE_URL}/cheer/protest/${protestId}`);
+    let cheerRes = http.post(`${CONFIG.BASE_URL}/api/cheer/protest/${protestId}`);
 
     // POST 요청 메트릭 기록
     cheerCallCounter.add(1);
@@ -57,7 +57,7 @@ export default function() {
         '응원 응답에 cheerCount 포함': (r) => {
             try {
                 const body = JSON.parse(r.body);
-                return body.cheerCount !== undefined;
+                return body.data.cheerCount !== undefined;
             } catch (e) {
                 return false;
             }
@@ -68,7 +68,7 @@ export default function() {
     const currentTime = new Date().getTime();
     if (currentTime - lastPollTime > CONFIG.POLLING_INTERVAL) {
         // 모든 시위의 응원 통계 조회
-        const pollRes = http.get(`${CONFIG.BASE_URL}/cheer/protest`);
+        const pollRes = http.get(`${CONFIG.BASE_URL}/api/cheer/protest`);
 
         // 폴링 호출 카운터 증가
         pollCallCounter.add(1);

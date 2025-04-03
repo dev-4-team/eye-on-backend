@@ -5,7 +5,7 @@ import { Counter, Trend } from 'k6/metrics';
 // 테스트 설정 변수
 const CONFIG = {
     WS_URL: `ws://${__ENV.API_HOST}:${__ENV.API_PORT}/ws`,
-    PROTEST_IDS: [1, 2, 3, 4, 5],
+    PROTEST_IDS: [1, 2, 3, 4],
     CHEER_INTERVAL: 3000,  // 응원 요청 간격
 
     // 테스트 단계 설정

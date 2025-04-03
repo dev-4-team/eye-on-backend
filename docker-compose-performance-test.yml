@@ -6,7 +6,7 @@ services:
     build: .
     container_name: ${CONTAINER_NAME}
     ports:
-      - "8081:8080"
+      - "8080:8080"
     restart: always
     volumes:
       - /var/log/eye-on:/app/logs
@@ -26,6 +26,7 @@ services:
       start_period: 5s
     networks:
       - monitoring
+      - default
 
   prometheus:
     image: prom/prometheus:v2.43.0
@@ -67,13 +68,14 @@ services:
     container_name: k6
     ports:
       - "6565:6565"
+    command: ["sleep", "infinity"]
     environment:
       - K6_PROMETHEUS_RW_SERVER_URL=http://prometheus:9090/api/v1/write
       - K6_OUT=experimental-prometheus-rw
       - API_HOST=${API_HOST}
       - API_PORT=${API_PORT}
     volumes:
-      - ./src/main/java/com/on/eye/api/test/scripts:/scripts
+      - ./src/test/java/com/on/eye/api/performance/scripts:/scripts
     depends_on:
       - prometheus
     networks:
