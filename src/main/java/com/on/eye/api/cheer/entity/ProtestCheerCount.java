@@ -16,7 +16,8 @@ import lombok.NoArgsConstructor;
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class ProtestCheerCount extends BaseTimeEntity {
-    @Id @Column(unique = true)
+    @Id
+    @Column(unique = true)
     private Long protestId;
 
     @Column(nullable = false)
