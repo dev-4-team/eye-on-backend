@@ -18,9 +18,10 @@ public interface ProtestCheerCountRepository extends JpaRepository<ProtestCheerC
     List<ProtestCheerCount> findAllByProtestIds(@Param("protestIds") List<Long> protestIds);
 
     @Query(
-            "SELECT pc FROM ProtestCheerCount pc WHERE pc.protestId IN (SELECT p.id FROM Protest p WHERE p.startDateTime >= :startDateTime)")
-    List<ProtestCheerCount> findAllByProtestStartDateTime(
-            @Param("startDateTime") LocalDateTime startDateTime);
+            "SELECT pc FROM ProtestCheerCount pc WHERE pc.protestId IN (SELECT p.id FROM Protest p WHERE p.startDateTime >= :startDateTime and p.endDateTime < :endDateTime)")
+    List<ProtestCheerCount> findAllByProtestBetweenStartDateTimeAndEndDateTime(
+            @Param("startDateTime") LocalDateTime startDateTime,
+            @Param("endDateTime") LocalDateTime endDateTime);
 
     @Modifying
     @Query(

@@ -31,7 +31,7 @@ public class RedisCheerCacheRepository implements CheerCacheRepository {
 
     @Override
     public Integer getCheerCount(Long protestId) {
-        String key = generateCheerCountKeyWithNullCheck(protestId);
+        String key = generateCheerCountKey(protestId);
         String count = redisTemplate.opsForValue().get(key);
         Integer result = count == null ? 0 : Integer.parseInt(count);
         log.debug("시위 ID: {} 응원 수 조회 - 카운트: {}", protestId, result);
