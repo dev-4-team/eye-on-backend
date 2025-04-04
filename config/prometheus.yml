@@ -1,14 +1,42 @@
 global:
-  scrape_interval: 15s
-  evaluation_interval: 15s
+  scrape_interval: 10s
+  evaluation_interval: 10s
+
+rule_files:
 
 scrape_configs:
+  # Prometheus 자체 모니터링
   - job_name: 'prometheus'
     static_configs:
-      - targets: ['localhost:9090']
+      - targets: [ 'prometheus:9090' ]  # localhost가 아닌 서비스 이름 사용
 
+  # Spring Boot 애플리케이션 메트릭 (Actuator 활성화 필요)
+  - job_name: 'spring-boot'
+    metrics_path: 'api/actuator/prometheus'
+    scrape_interval: 10s
+    static_configs:
+      - targets: [ 'app:8080' ]
+
+  # Docker 호스트 메트릭 (선택적) - node-exporter 추가 필요
+  - job_name: 'node-exporter'
+    static_configs:
+      - targets: [ 'node-exporter:9100' ]
+
+  # k6 부하 테스트 메트릭
+  - job_name: 'k6'
+    scrape_interval: 10s  # 성능 테스트 중 세밀한 데이터 수집
+    static_configs:
+      - targets: [ 'k6:6565' ]
+    metric_relabel_configs:
+      - source_labels: [ __name__ ]
+        regex: 'k6_.*'
+        action: 'keep'
+
+# 원격 쓰기/읽기 설정 (k6 통합용)
+# k6에서 원격 쓰기를 위한 설정 - 중요: 수신 필터링 추가
 remote_write:
-  - url: http://localhost:9090/api/v1/write
-
-remote_read:
-  - url: http://localhost:9090/api/v1/read
+  - url: http://prometheus:9090/api/v1/write
+    write_relabel_configs:
+      - source_labels: [ __name__ ]
+        regex: 'k6_.*'
+        action: keep
