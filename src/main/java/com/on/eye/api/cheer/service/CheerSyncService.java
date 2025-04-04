@@ -58,8 +58,8 @@ public class CheerSyncService {
         log.info("DB -> Cache 응원 데이터 초기화 시작");
 
         List<ProtestCheerCount> allCheers =
-                protestCheerCountRepository.findAllByProtestStartDateTime(
-                        LocalDateTimeUtils.todayStartTime());
+                protestCheerCountRepository.findAllByProtestBetweenStartDateTimeAndEndDateTime(
+                        LocalDateTimeUtils.todayStartTime(), LocalDateTimeUtils.todayEndTime());
         int loadedCount = 0;
 
         for (ProtestCheerCount cheer : allCheers) {
