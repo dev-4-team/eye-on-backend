@@ -15,24 +15,24 @@
         <RollingFile name="ApplicationAppender"
                      fileName="${FILE_PATH}/current/application.log"
                      filePattern="${FILE_PATH}/archive/application/application-%d{yyyy-MM-dd}-%i.log">
-            <PatternLayout pattern="${LOG_PATTERN}" charset="UTF-8" />
+            <PatternLayout pattern="${LOG_PATTERN}" charset="UTF-8"/>
             <Policies>
                 <SizeBasedTriggeringPolicy size="20MB"/>
-                <TimeBasedTriggeringPolicy interval="1" modulate="true" />
+                <TimeBasedTriggeringPolicy interval="1" modulate="true"/>
             </Policies>
             <DefaultRolloverStrategy max="30">
                 <Delete basePath="${FILE_PATH}/archive/application" maxDepth="1">
                     <IfLastModified age="30d"/>
                 </Delete>
             </DefaultRolloverStrategy>
-            <ThresholdFilter level="INFO" onMatch="ACCEPT" onMismatch="DENY" />
+            <ThresholdFilter level="INFO" onMatch="ACCEPT" onMismatch="DENY"/>
         </RollingFile>
 
         <!-- Error Log: WARN 레벨 이상 -->
         <RollingFile name="ErrorAppender"
                      fileName="${FILE_PATH}/current/error.log"
                      filePattern="${FILE_PATH}/archive/error/error-%d{yyyy-MM-dd}-%i.log">
-            <PatternLayout pattern="${LOG_PATTERN}" charset="UTF-8" />
+            <PatternLayout pattern="${LOG_PATTERN}" charset="UTF-8"/>
             <Policies>
                 <SizeBasedTriggeringPolicy size="20MB"/>
                 <TimeBasedTriggeringPolicy interval="1" modulate="true"/>
@@ -42,14 +42,14 @@
                     <IfLastModified age="30d"/>
                 </Delete>
             </DefaultRolloverStrategy>
-            <ThresholdFilter level="WARN" onMatch="ACCEPT" onMismatch="DENY" />
+            <ThresholdFilter level="WARN" onMatch="ACCEPT" onMismatch="DENY"/>
         </RollingFile>
 
         <!-- Auth Log: 인증 과정에서 발생하는 로그만 -->
         <RollingFile name="AuthAppender"
                      fileName="${FILE_PATH}/auth/auth.log"
                      filePattern="${FILE_PATH}/auth/auth-%d{yyyy-MM-dd}-%i.log">
-            <PatternLayout pattern="${LOG_PATTERN}" charset="UTF-8" />
+            <PatternLayout pattern="${LOG_PATTERN}" charset="UTF-8"/>
             <Policies>
                 <SizeBasedTriggeringPolicy size="20MB"/>
                 <TimeBasedTriggeringPolicy interval="1" modulate="true"/>
@@ -81,9 +81,11 @@
             <AppenderRef ref="AsyncAuthAppender"/>
         </Logger>
 
+        <Logger name="org.springframework.boot.actuate" level="INFO"/>
+
         <Root level="INFO">
-            <AppenderRef ref="AsyncApplicationAppender" />
-            <AppenderRef ref="AsyncErrorAppender" />
+            <AppenderRef ref="AsyncApplicationAppender"/>
+            <AppenderRef ref="AsyncErrorAppender"/>
             <AppenderRef ref="ConsoleAppender" level="WARN"/>
         </Root>
     </Loggers>

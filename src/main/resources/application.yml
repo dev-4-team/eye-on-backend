@@ -1,4 +1,7 @@
 server:
+  tomcat:
+    mbeanregistry:
+      enabled: true
   servlet:
     context-path: /api             # 컨텍스트 패스는 별도로 설정
 spring:
@@ -74,7 +77,14 @@ management:
   endpoints:
     web:
       exposure:
-        include: health,info
+        include: health,info,prometheus,metrics
+  prometheus:
+    metrics:
+      export:
+        enabled: true
+  info:
+    process:
+      enabled: true
 
 logging:
   config: classpath:log4j2-${spring.profiles.active}.xml
