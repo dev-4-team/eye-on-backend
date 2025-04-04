@@ -3,11 +3,14 @@ services:
   app:
     env_file:
       - .env
+    environment:
+      - DB_URL=jdbc:postgresql://host.docker.internal:5432/${DB_NAME}
+      - REDIS_HOST=host.docker.internal
     build: .
     container_name: ${CONTAINER_NAME}
     ports:
       - "8080:8080"
-    restart: always
+    restart: unless-stopped
     volumes:
       - /var/log/eye-on:/app/logs
     deploy:
@@ -43,7 +46,7 @@ services:
       - --web.console.libraries=/etc/prometheus/console_libraries
       - --web.console.templates=/etc/prometheus/consoles
       - --web.enable-lifecycle
-      - --enable-feature=remote-write-receiver
+      - --web.enable-remote-write-receiver
     networks:
       - monitoring
 
@@ -68,7 +71,7 @@ services:
     container_name: k6
     ports:
       - "6565:6565"
-    command: ["sleep", "infinity"]
+    command: [ "sleep", "infinity" ]
     environment:
       - K6_PROMETHEUS_RW_SERVER_URL=http://prometheus:9090/api/v1/write
       - K6_OUT=experimental-prometheus-rw
@@ -76,6 +79,16 @@ services:
       - API_PORT=${API_PORT}
     volumes:
       - ./src/test/java/com/on/eye/api/performance/scripts:/scripts
+    depends_on:
+      - prometheus
+    networks:
+      - monitoring
+
+  node-exporter:
+    image: prom/node-exporter
+    container_name: node-exporter
+    ports:
+      - "9100:9100"
     depends_on:
       - prometheus
     networks:
