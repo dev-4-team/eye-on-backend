@@ -32,6 +32,13 @@ scrape_configs:
         regex: 'k6_.*'
         action: 'keep'
 
+  # 컨테이너 메트릭 수집을 위한 cAdvisor
+  - job_name: 'cadvisor'
+    scrape_interval: 10s
+    metrics_path: /metrics  # 명시적으로 경로 지정
+    static_configs:
+      - targets: ['cadvisor:8080']
+
 # 원격 쓰기/읽기 설정 (k6 통합용)
 # k6에서 원격 쓰기를 위한 설정 - 중요: 수신 필터링 추가
 remote_write:
