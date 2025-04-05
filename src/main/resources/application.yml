@@ -2,6 +2,9 @@ server:
   tomcat:
     mbeanregistry:
       enabled: true
+    threads:
+      max: 10
+      min-spare: 5
   servlet:
     context-path: /api             # 컨텍스트 패스는 별도로 설정
 spring:
@@ -32,9 +35,11 @@ spring:
   datasource:
     hikari:
       driver-class-name: org.postgresql.Driver
-      connection-timeout: '20000'
       maximum-pool-size: '4'
-      minimum-idle: '1'
+      minimum-idle: '4'
+      idle-timeout: 600000    # 10분
+      max-lifetime: 1800000   # 30분
+      connection-timeout: 20000  # 20초
       connection-test-query: SELECT 1
     password: ${DB_PASSWORD}
     driver-class-name: org.postgresql.Driver
@@ -90,7 +95,7 @@ logging:
   config: classpath:log4j2-${spring.profiles.active}.xml
   level:
     web: DEBUG
-    com.zaxxer.hikari.HikariConfig: DEBUG
+#    com.zaxxer.hikari.HikariConfig: DEBUG
     org.springframework.orm.jpa: DEBUG
     org.springframework.transaction: DEBUG
     org.springframework.security: DEBUG
