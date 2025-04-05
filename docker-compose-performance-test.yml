@@ -31,6 +31,22 @@ services:
       - monitoring
       - default
 
+  cadvisor:
+    image: gcr.io/cadvisor/cadvisor
+    privileged: true
+    restart: unless-stopped
+    container_name: cadvisor
+    ports:
+      - "8085:8080"
+    volumes:
+      - /:/rootfs:ro
+      - /var/run:/var/run:rw
+      - /sys:/sys:ro
+      - /var/lib/docker/:/var/lib/docker:ro
+      - /dev/disk/:/dev/disk:ro
+    networks:
+      - monitoring
+
   prometheus:
     image: prom/prometheus:v2.43.0
     container_name: prometheus
@@ -47,6 +63,8 @@ services:
       - --web.console.templates=/etc/prometheus/consoles
       - --web.enable-lifecycle
       - --web.enable-remote-write-receiver
+    depends_on:
+      - cadvisor
     networks:
       - monitoring
 
@@ -79,6 +97,8 @@ services:
       - API_PORT=${API_PORT}
     volumes:
       - ./src/test/java/com/on/eye/api/performance/scripts:/scripts
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     depends_on:
       - prometheus
     networks:
@@ -93,6 +113,8 @@ services:
       - prometheus
     networks:
       - monitoring
+
+
 
 networks:
   monitoring:
