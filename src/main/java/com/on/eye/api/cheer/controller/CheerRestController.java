@@ -6,7 +6,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import com.on.eye.api.cheer.dto.CheerStat;
-import com.on.eye.api.cheer.service.CheerDbService;
+import com.on.eye.api.cheer.service.CheerService;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -19,7 +19,7 @@ import lombok.extern.slf4j.Slf4j;
 @RequiredArgsConstructor
 @Slf4j
 public class CheerRestController {
-    private final CheerDbService cheerDbService;
+    private final CheerService cheerDbService;
 
     /**
      * 특정 시위의 응원 수를 조회
