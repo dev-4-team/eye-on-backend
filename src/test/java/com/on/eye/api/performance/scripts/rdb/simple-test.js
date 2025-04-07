@@ -4,15 +4,16 @@ import {Counter, Rate, Trend} from 'k6/metrics';
 
 // 테스트 설정 변수
 const CONFIG = {
-    BASE_URL: `http://${__ENV.API_HOST}:${__ENV.API_PORT}`,
+    BASE_URL: `https://${__ENV.API_HOST}`,
     PROTEST_IDS: [1, 2, 3, 4],
     POLLING_INTERVAL: 3000,
     CHEER_REQUEST_PER_SECOND: 3, // 1초에 3번 응원 요청
 
     // 테스트 단계 설정
     STAGES: [
-        {duration: '1m', target: 100},
-        {duration: '5m', target: 3000},
+        {duration: '1m', target: 300},
+        {duration: '2m', target: 2500},
+        {duration: '2m', target: 2500},
         {duration: '2m', target: 0},
     ]
 }

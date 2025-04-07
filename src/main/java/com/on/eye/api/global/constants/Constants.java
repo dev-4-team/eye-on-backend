@@ -14,6 +14,7 @@ public final class Constants {
         "http://localhost:3000",
         "http://localhost:63342",
         "https://www.eye-on.kr",
-        "https://eye-on.kr"
+        "https://eye-on.kr",
+        "https://smartcow-test.ddnsking.com",
     };
 }
