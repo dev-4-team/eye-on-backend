@@ -35,7 +35,6 @@ public class CheerWebSocketController {
     public void processCheerRequest(
             @DestinationVariable Long protestId,
             @Payload(required = false) CheerRequest cheerRequest) {
-        log.debug("응원 요청 - 시위 ID: {}", protestId);
         cheerCacheService.cheerProtest(protestId);
     }
 
@@ -46,7 +45,6 @@ public class CheerWebSocketController {
      */
     @SubscribeMapping(CHEER_TOPIC)
     public List<CheerStat> getInitCheerCounts() {
-        log.debug("응원 토픽 구독");
         return cheerCacheService.getAllCheerStats();
     }
 }
