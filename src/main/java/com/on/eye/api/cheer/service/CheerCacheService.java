@@ -34,7 +34,6 @@ public class CheerCacheService implements CheerService {
         // 시위 존재 확인
 
         Integer newCount = cheerCacheRepository.incrementCheerCount(protestId);
-        log.debug("시위 ID: {} 응원 성공 - 현재 응원 수: {}", protestId, newCount);
 
         CheerUpdateDto updateDto = CheerUpdateDto.of(protestId, newCount);
         // websocket을 통해 모든 구독자에게 업데이트 전송
@@ -73,7 +72,6 @@ public class CheerCacheService implements CheerService {
     public void setCheerCount(Long protestId, Integer count) {
 
         cheerCacheRepository.setCheerCount(protestId, count);
-        log.info("시위 ID: {} 응원 수 설정 완료 - 설정값: {}", protestId, count);
 
         // 변경된 값을 실시간으로 발행
         publishCheerUpdate(CheerUpdateDto.of(protestId, count));
@@ -82,15 +80,10 @@ public class CheerCacheService implements CheerService {
     public void publishCheerUpdate(CheerUpdateDto updateDto) {
         String destination = CHEER_TOPIC;
         simpMessagingTemplate.convertAndSend(destination, updateDto);
-        log.debug(
-                "시위 ID: {} 응원 업데이트 메시지 발행 완료 | destination: {}",
-                updateDto.protestId(),
-                destination);
     }
 
     public void clearAllOutdatedCheerCounts() {
         cheerCacheRepository.clearAllOutdatedCheerCounts();
-        log.info("모든 응원 Cache Clear");
     }
 
     public List<CheerStat> getCheerCountsForSync() {
