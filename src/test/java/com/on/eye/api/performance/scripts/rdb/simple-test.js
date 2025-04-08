@@ -115,7 +115,8 @@ export default function () {
                     } catch (e) {
                         return false;
                     }
-                }
+                },
+                '응답 시간 1000ms 이내': (r) => r.timings.duration < 1000
             });
 
             // 성공/실패 카운트 업데이트
