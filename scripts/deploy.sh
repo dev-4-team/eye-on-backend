@@ -22,6 +22,8 @@ echo "DOCKER_HUB_USR=${DOCKER_HUB_USR}" >> .env
 echo "APP_NAME=${APP_NAME}" >> .env
 echo "BUILD_NUMBER=${BUILD_NUMBER}" >> .env
 echo "CONTAINER_NAME=${CONTAINER_NAME}" >> .env
+echo "REDIS_HOST=${REDIS_HOST}" >> .env
+echo "REDIS_PORT=${REDIS_PORT}" >> .env
 
 # 현재 상태 백업
 cp docker-compose.yml docker-compose.yml.backup
