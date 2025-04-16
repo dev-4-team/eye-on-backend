@@ -39,10 +39,16 @@ public class RedisCheerCacheRepository implements CheerCacheRepository {
     }
 
     @Override
-    public List<CheerStat> getAllCheerStats() {
+    public void setCheerCount(Long protestId, Integer count) {
+        String key = generateCheerCountKey(protestId); // 여기선 걍 키 만들어야지!
+        redisTemplate.opsForValue().set(key, String.valueOf(count));
+    }
+
+    @Override
+    public List<CheerStat> getTodayCheerStats() {
         List<CheerStat> stats = new ArrayList<>();
         Set<String> keys = redisTemplate.keys(CHEER_COUNT_KEY_PREFIX + "*");
-        if (keys == null || keys.isEmpty()) return stats;
+        if (keys.isEmpty()) return stats;
 
         for (String key : keys) {
             Long protestId = extractProtestId(key);
@@ -55,24 +61,9 @@ public class RedisCheerCacheRepository implements CheerCacheRepository {
     }
 
     @Override
-    public void setCheerCount(Long protestId, Integer count) {
-        String key = generateCheerCountKey(protestId); // 여기선 걍 키 만들어야지!
-        redisTemplate.opsForValue().set(key, String.valueOf(count));
-    }
-
-    @Override
-    public List<CheerStat> getCheerStatsForSync() {
-        // 현재 구현에서는 getAllCheerCounts와 동일하게 동작하지만,
-        // 추후 동기화를 위한 추가 로직을 포함할 수 있도록 별도 메서드로 분리
-        List<CheerStat> stats = getAllCheerStats();
-        log.debug("동기화용 시위 응원 수 조회 - 총 {}개 시위", stats.size());
-        return stats;
-    }
-
-    @Override
     public void clearAllOutdatedCheerCounts() {
         Set<String> keys = redisTemplate.keys(CHEER_COUNT_KEY_PREFIX + "*");
-        if (keys == null || keys.isEmpty()) return;
+        if (keys.isEmpty()) return;
 
         redisTemplate.delete(keys);
     }
