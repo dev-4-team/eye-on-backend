@@ -1,13 +1,15 @@
 package com.on.eye.api.cheer.controller;
 
-import com.on.eye.api.cheer.dto.CheerStat;
-import com.on.eye.api.cheer.service.CheerService;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
+import java.util.List;
+
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
+import com.on.eye.api.cheer.dto.CheerStat;
+import com.on.eye.api.cheer.service.CheerService;
+
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * 응원 관련 REST API 컨트롤러 HTTP 요청을 통한 응원 기능을 제공. Polling vs WebSocket 비교 or WebSocket 불가능한 상황 대처 위해 생성
@@ -17,7 +19,7 @@ import java.util.List;
 @RequiredArgsConstructor
 @Slf4j
 public class CheerRestController {
-    private final CheerService cheerCacheService;
+    private final CheerService cheerService;
 
     /**
      * 특정 시위의 응원 수를 조회
@@ -27,7 +29,7 @@ public class CheerRestController {
      */
     @GetMapping("/{protestId}")
     public ResponseEntity<CheerStat> getCheerStat(@PathVariable Long protestId) {
-        CheerStat stats = cheerCacheService.getCheerStat(protestId);
+        CheerStat stats = cheerService.getCheerStat(protestId);
         log.debug("응원 통계 조회 - 시위 ID: {}, 응원 수: {}", protestId, stats.cheerCount());
         return ResponseEntity.ok(stats);
     }
@@ -39,7 +41,7 @@ public class CheerRestController {
      */
     @GetMapping
     public ResponseEntity<List<CheerStat>> getAllCheerStat() {
-        List<CheerStat> statsList = cheerCacheService.getAllCheerStats();
+        List<CheerStat> statsList = cheerService.getTodayCheerStats();
         log.debug("모든 시위 응원 통계 조회 - 시위 개수: {}", statsList.size());
         return ResponseEntity.ok(statsList);
     }
@@ -52,10 +54,8 @@ public class CheerRestController {
      */
     @PostMapping("/{protestId}")
     public ResponseEntity<CheerStat> cheerProtest(@PathVariable Long protestId) {
-        Integer cheerCount = cheerCacheService.cheerProtest(protestId);
-        log.debug("REST API 응원 요청 - 시위 ID: {}, 응원 후 카운트: {}", protestId, cheerCount);
-
-        CheerStat stats = new CheerStat(protestId, cheerCount);
-        return ResponseEntity.ok(stats);
+        CheerStat cheerStat = cheerService.cheerProtest(protestId);
+        log.debug("REST API 응원 요청 - 시위 ID: {}, 응원 후 카운트: {}", protestId, cheerStat.cheerCount());
+        return ResponseEntity.ok(cheerStat);
     }
 }

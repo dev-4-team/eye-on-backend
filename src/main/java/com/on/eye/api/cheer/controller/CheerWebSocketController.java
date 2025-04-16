@@ -6,13 +6,12 @@ import java.util.List;
 
 import org.springframework.messaging.handler.annotation.DestinationVariable;
 import org.springframework.messaging.handler.annotation.MessageMapping;
-import org.springframework.messaging.handler.annotation.Payload;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.messaging.simp.annotation.SubscribeMapping;
 import org.springframework.stereotype.Controller;
 
-import com.on.eye.api.cheer.dto.CheerRequest;
 import com.on.eye.api.cheer.dto.CheerStat;
-import com.on.eye.api.cheer.service.CheerCacheService;
+import com.on.eye.api.cheer.service.CheerService;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -23,19 +22,18 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class CheerWebSocketController {
 
-    private final CheerCacheService cheerCacheService;
+    private final CheerService cheerCacheService;
+    private final SimpMessagingTemplate simpMessagingTemplate;
 
     /**
      * 클라이언트로부터 응원 요청을 처리. 예: /app/cheer/protest/123 (123은 시위 ID)
      *
      * @param protestId 시위 ID
-     * @param cheerRequest 응원 요청 데이터
      */
     @MessageMapping("/cheer/protest/{protestId}")
-    public void processCheerRequest(
-            @DestinationVariable Long protestId,
-            @Payload(required = false) CheerRequest cheerRequest) {
-        cheerCacheService.cheerProtest(protestId);
+    public void processCheerRequest(@DestinationVariable Long protestId) {
+        CheerStat cheerStat = cheerCacheService.cheerProtest(protestId);
+        simpMessagingTemplate.convertAndSend(CHEER_TOPIC, cheerStat);
     }
 
     /**
@@ -45,6 +43,6 @@ public class CheerWebSocketController {
      */
     @SubscribeMapping(CHEER_TOPIC)
     public List<CheerStat> getInitCheerCounts() {
-        return cheerCacheService.getAllCheerStats();
+        return cheerCacheService.getTodayCheerStats();
     }
 }
