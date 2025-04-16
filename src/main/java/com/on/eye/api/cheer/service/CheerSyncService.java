@@ -9,6 +9,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.on.eye.api.cheer.dto.CheerStat;
 import com.on.eye.api.cheer.entity.ProtestCheerCount;
+import com.on.eye.api.cheer.repository.CheerCacheRepository;
 import com.on.eye.api.cheer.repository.ProtestCheerCountRepository;
 import com.on.eye.api.global.common.util.LocalDateTimeUtils;
 
@@ -21,7 +22,7 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class CheerSyncService {
     private final ProtestCheerCountRepository protestCheerCountRepository;
-    private final CheerCacheService cheerCacheService;
+    private final CheerCacheRepository cheerCacheRepository;
 
     /** 주기마다 Cache -> DB로 data Sync */
     @Scheduled(fixedDelayString = "${cheer.sync.interval:300000}") // 기본 5분
@@ -43,7 +44,7 @@ public class CheerSyncService {
         // 1. sync cache -> db
         syncCacheToDB();
         // 2. cache clear
-        cheerCacheService.clearAllOutdatedCheerCounts();
+        cheerCacheRepository.clearAllOutdatedCheerCounts();
 
         // 3. create new cheer counts
         List<ProtestCheerCount> dailyUpdatedCheerList =
@@ -65,14 +66,14 @@ public class CheerSyncService {
         for (ProtestCheerCount cheer : allCheers) {
             try {
                 if (isUpdate) {
-                    cheerCacheService.setCheerCount(cheer.getProtestId(), cheer.getCheerCount());
+                    cheerCacheRepository.setCheerCount(cheer.getProtestId(), cheer.getCheerCount());
                     loadedCount++;
                 } else {
                     // Cache의 응원 수가 DB보다 많으면 유지, 아니면 DB 값으로 설정
                     Integer cacheCheerCount =
-                            cheerCacheService.getCheerStat(cheer.getProtestId()).cheerCount();
+                            cheerCacheRepository.getCheerCount(cheer.getProtestId());
                     if (cacheCheerCount < cheer.getCheerCount()) {
-                        cheerCacheService.setCheerCount(
+                        cheerCacheRepository.setCheerCount(
                                 cheer.getProtestId(), cheer.getCheerCount());
                         loadedCount++;
                     }
@@ -86,7 +87,7 @@ public class CheerSyncService {
     }
 
     private void syncCacheToDB() {
-        List<CheerStat> dataToSync = cheerCacheService.getCheerCountsForSync();
+        List<CheerStat> dataToSync = cheerCacheRepository.getTodayCheerStats();
         log.info("Cache -> DB 응원 데이터 동기화 시작 - 총 {}개 시위", dataToSync.size());
 
         List<Long> syncedIds = new ArrayList<>();

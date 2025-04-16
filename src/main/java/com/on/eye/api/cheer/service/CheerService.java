@@ -11,7 +11,7 @@ public interface CheerService {
      * @param protestId 시위 ID
      * @return 증가 후의 응원 수
      */
-    Integer cheerProtest(Long protestId);
+    CheerStat cheerProtest(Long protestId);
 
     /**
      * 시위의 현재 응원 통계를 조회
@@ -22,9 +22,9 @@ public interface CheerService {
     CheerStat getCheerStat(Long protestId);
 
     /**
-     * 모든 시위의 응원 통계를 조회
+     * 모든 오늘 시위의 응원 통계를 조회
      *
      * @return 모든 시위의 응원 통계 목록
      */
-    List<CheerStat> getAllCheerStats();
+    List<CheerStat> getTodayCheerStats();
 }
