@@ -2,6 +2,7 @@ package com.on.eye.api.cheer.repository;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import org.springframework.stereotype.Repository;
@@ -65,5 +66,16 @@ public class JpaCheerRepository implements CheerRepository {
                                 new CheerStat(
                                         cheerCount.getProtestId(), cheerCount.getCheerCount()))
                 .toList();
+    }
+
+    @Override
+    @Transactional
+    public void incrementCheerCountBatch(Map<Long, Integer> pendingCheers) {
+        for (Map.Entry<Long, Integer> entry : pendingCheers.entrySet()) {
+            Long protestId = entry.getKey();
+            Integer increment = entry.getValue();
+
+            protestCheerCountRepository.incrementCheerCountBatch(protestId, increment);
+        }
     }
 }
