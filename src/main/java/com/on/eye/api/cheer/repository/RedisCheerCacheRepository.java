@@ -2,6 +2,7 @@ package com.on.eye.api.cheer.repository;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import org.springframework.data.redis.core.StringRedisTemplate;
@@ -66,6 +67,16 @@ public class RedisCheerCacheRepository implements CheerCacheRepository {
         if (keys.isEmpty()) return;
 
         redisTemplate.delete(keys);
+    }
+
+    @Override
+    public void incrementCheerCountBatch(Map<Long, Integer> pendingCheers) {
+        for (Map.Entry<Long, Integer> entry : pendingCheers.entrySet()) {
+            String key = "protest:cheer:" + entry.getKey();
+            Integer increment = entry.getValue();
+
+            redisTemplate.opsForValue().increment(key, increment);
+        }
     }
 
     private String generateCheerCountKeyWithNullCheck(Long protestId) {

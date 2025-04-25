@@ -27,4 +27,9 @@ public interface ProtestCheerCountRepository extends JpaRepository<ProtestCheerC
     @Query(
             "UPDATE ProtestCheerCount pc SET pc.cheerCount = pc.cheerCount + 1 WHERE pc.protestId = :protestId")
     Integer incrementCheerCount(@Param("protestId") Long protestId);
+
+    @Modifying
+    @Query(
+            "UPDATE ProtestCheerCount pc SET pc.cheerCount = pc.cheerCount + ?2 WHERE pc.protestId = ?1")
+    void incrementCheerCountBatch(Long protestId, Integer increment);
 }

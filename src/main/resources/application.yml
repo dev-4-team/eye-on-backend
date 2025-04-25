@@ -102,3 +102,7 @@ logging:
     org.springframework.web.client.RestTemplate: DEBUG
     org.springframework.security.web.FilterChainProxy: DEBUG
     org.springframework.security.web.authentication.OAuth2LoginAuthenticationFilter: TRACE
+
+cheer:
+  repository:
+    type: jpa
