@@ -55,12 +55,12 @@ public class Protest extends BaseTimeEntity {
     private final List<ParticipantsVerification> participantsVerifications = new ArrayList<>();
 
     @Column(nullable = false)
-    @Min(1)
+    @Min(0)
     @Max(5000000)
     private Integer declaredParticipants;
 
     @Column(nullable = false)
-    private Integer radius = 500;
+    private Integer radius = 10;
 
     @Builder
     public Protest(
