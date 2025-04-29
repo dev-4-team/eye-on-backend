@@ -26,7 +26,7 @@ public record ProtestResponse(
 
         return ProtestResponse.builder()
                 .id(protest.getId())
-                .title(organizer != null ? organizer.title() : protest.getTitle())
+                .title(protest.getTitle())
                 .description(organizer != null ? organizer.description() : null)
                 .organizer(organizer != null ? organizer.name() : null)
                 .startDateTime(protest.getStartDateTime())
